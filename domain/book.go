@@ -53,6 +53,7 @@ func (s *Service) Save(ctx context.Context, nb NewBook) (Book, error) {
 		Authors:   nb.Authors,
 		Publisher: nb.Publisher,
 		Pages:     nb.Pages,
+		ISBN:      nb.ISBN,
 	}
 
 	if err := s.storer.Save(ctx, book); err != nil {

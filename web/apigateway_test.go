@@ -56,6 +56,7 @@ func TestCreateBookDuplicateID(t *testing.T) {
 		Authors:   "Alan A. A. Donovan, Brian W. Kernighan",
 		Publisher: "Addison-Wesley Professional",
 		Pages:     400,
+		ISBN:      "978-0134190440",
 	}
 
 	err := store.Save(ctx, existingBook)
@@ -72,7 +73,8 @@ func TestCreateBookDuplicateID(t *testing.T) {
 		"title": "The Go Programming Language",
 		"authors": "Alan A. A. Donovan, Brian W. Kernighan",
 		"publisher": "Addison-Wesley Professional",
-		"pages": 400
+		"pages": 400,
+		"isbn": "978-0134190440"
 	}`
 
 	// Call the CreateBook method of the handler
@@ -113,14 +115,16 @@ func TestCreateBook(t *testing.T) {
 		"title": "The Go Programming Language",
 		"authors": "Alan A. A. Donovan, Brian W. Kernighan",
 		"publisher": "Addison-Wesley Professional",
-		"pages": 400
+		"pages": 400,
+		"isbn": "978-0134190440"
 	}`
 	expectedJSONBook := `{
 		"id": "ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812",
 		"title": "The Go Programming Language",
 		"authors": "Alan A. A. Donovan, Brian W. Kernighan",
 		"publisher": "Addison-Wesley Professional",
-		"pages": 400
+		"pages": 400,
+		"isbn": "978-0134190440"
 	}`
 
 	// Call the CreateBook method of the handler

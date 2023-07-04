@@ -9,6 +9,7 @@ type Book struct {
 	Authors   string
 	Publisher string
 	Pages     int
+	ISBN      string
 }
 
 // NewBook contains information needed to create a new book.
@@ -17,4 +18,5 @@ type NewBook struct {
 	Authors   string
 	Publisher string
 	Pages     int
+	ISBN      string
 }

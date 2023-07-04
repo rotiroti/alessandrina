@@ -33,6 +33,7 @@ func TestSave(t *testing.T) {
 		Authors:   "Test Author",
 		Publisher: "Test Publisher",
 		Pages:     100,
+		ISBN:      "Test ISBN",
 	}
 	expectedBook := domain.Book{
 		ID:        expectedID,
@@ -40,6 +41,7 @@ func TestSave(t *testing.T) {
 		Authors:   newBook.Authors,
 		Publisher: newBook.Publisher,
 		Pages:     newBook.Pages,
+		ISBN:      newBook.ISBN,
 	}
 
 	// Set up the expectations for the mockStorer's Save method
@@ -80,6 +82,7 @@ func TestSaveFail(t *testing.T) {
 		Authors:   "Test Author",
 		Publisher: "Test Publisher",
 		Pages:     100,
+		ISBN:      "Test ISBN",
 	}
 	expectedBook := domain.Book{
 		ID:        expectedID,
@@ -87,6 +90,7 @@ func TestSaveFail(t *testing.T) {
 		Authors:   newBook.Authors,
 		Publisher: newBook.Publisher,
 		Pages:     newBook.Pages,
+		ISBN:      newBook.ISBN,
 	}
 
 	// Set up the expectations for the mockStorer's Save method
