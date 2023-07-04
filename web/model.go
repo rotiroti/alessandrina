@@ -9,6 +9,7 @@ type AppBook struct {
 	Authors   string `json:"authors"`
 	Publisher string `json:"publisher"`
 	Pages     int    `json:"pages"`
+	ISBN      string `json:"isbn"`
 }
 
 // ToAppBook converts a domain.Book to an AppBook.
@@ -19,6 +20,7 @@ func ToAppBook(book domain.Book) AppBook {
 		Authors:   book.Authors,
 		Publisher: book.Publisher,
 		Pages:     book.Pages,
+		ISBN:      book.ISBN,
 	}
 }
 
@@ -28,6 +30,7 @@ type AppNewBook struct {
 	Authors   string `json:"authors"`
 	Publisher string `json:"publisher"`
 	Pages     int    `json:"pages"`
+	ISBN      string `json:"isbn"`
 }
 
 // ToDomainNewBook converts an AppNewBook to a domain.NewBook.
@@ -37,5 +40,6 @@ func ToDomainNewBook(book AppNewBook) domain.NewBook {
 		Authors:   book.Authors,
 		Publisher: book.Publisher,
 		Pages:     book.Pages,
+		ISBN:      book.ISBN,
 	}
 }
