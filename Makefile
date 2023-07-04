@@ -1,11 +1,15 @@
 AWS_TESTING_API_URL = http://localhost:3000
 CUR_DIR = $(shell echo "${PWD}")
 
-.PHONY: unit-tests integration-tests coverage format clean mocks remove-mocks
+.PHONY: unit-tests integration-tests coverage format clean mocks remove-mocks lint
 
 format:
 	@echo "Format code"
 	go fmt ./...
+
+lint:
+	@echo "Run linting"
+	@docker run -t --rm -v ${CUR_DIR}:/app -w /app golangci/golangci-lint:v1.53 golangci-lint run --fix -v
 
 unit-tests:
 	@echo "Run unit tests"
