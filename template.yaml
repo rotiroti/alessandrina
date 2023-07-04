@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SAM Template for Alessandrina serverless application.
+Globals:
+  Function:
+    Timeout: 10
+    MemorySize: 128
+    Runtime: go1.x
+    Tracing: Active
+    Architectures: [x86_64]
+
+Resources:
+  BooksAPI:
+    Type: AWS::Serverless::HttpApi
+
+  CreateBookFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      CodeUri: .
+      Handler: create-book
+      Description: Create a new book
+      AutoPublishAlias: prod
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref BooksAPI
+            Path: /books
+            Method: POST
+
+Outputs:
+  WebEndpoint:
+    Description: "API Gateway endpoint URL for the Books API"
+    Value: !Sub "https://${BooksAPI}.execute-api.${AWS::Region}.amazonaws.com/"
+  CreateBookFunction:
+    Description: "CreateBook Lambda Function ARN"
+    Value: !GetAtt CreateBookFunction.Arn
