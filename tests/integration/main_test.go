@@ -1,0 +1,85 @@
+package integration
+
+import (
+	"bytes"
+	"encoding/json"
+	"math/rand"
+	"net/http"
+	"os"
+	"strconv"
+	"testing"
+
+	"github.com/brianvoe/gofakeit/v6"
+	"github.com/google/uuid"
+)
+
+func skipIntegration(t *testing.T) {
+	t.Helper()
+	if os.Getenv("INTEGRATION") == "" {
+		t.Skip("skipping integration tests, set environment variable INTEGRATION")
+	}
+}
+
+func TestIntegrationCreateBook(t *testing.T) {
+	t.Parallel()
+
+	// Skip the integration test if the GO_RUN_INTEGRATION environment variable is not set
+	skipIntegration(t)
+
+	apiURL := os.Getenv("AWS_TESTING_API_URL")
+	if apiURL == "" {
+		t.Fatal("AWS_TESTING_API_URL environment variable is not set")
+	}
+
+	// Remove the trailing slash from the URL if it exists
+	if apiURL[len(apiURL)-1] == '/' {
+		apiURL = apiURL[:len(apiURL)-1]
+	}
+
+	// Generate a random JSON payload for the book data
+	bookData := map[string]interface{}{
+		"title":     gofakeit.BookTitle(),
+		"authors":   gofakeit.BookAuthor(),
+		"publisher": gofakeit.Company(),
+		"isbn":      strconv.Itoa(rand.Intn(9999999999999)),
+		"pages":     gofakeit.Number(100, 1200),
+	}
+
+	payload, err := json.Marshal(bookData)
+	if err != nil {
+		t.Fatalf("Failed to marshal book data: %v", err)
+	}
+
+	req, err := http.NewRequest("POST", apiURL+"/books", bytes.NewBuffer(payload))
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	// Set any necessary headers for the request
+	req.Header.Set("Content-Type", "application/json")
+
+	// Create an HTTP client and make the request
+	client := http.DefaultClient
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatalf("Request failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Check the response status code
+	if resp.StatusCode != http.StatusCreated {
+		t.Errorf("Expected status code %d but got %d", http.StatusCreated, resp.StatusCode)
+	}
+
+	// Parse the response body
+	var responseBody map[string]interface{}
+	err = json.NewDecoder(resp.Body).Decode(&responseBody)
+	if err != nil {
+		t.Fatalf("Failed to decode response: %v", err)
+	}
+
+	// Check the ID field for a valid UUID
+	if _, err := uuid.Parse(responseBody["id"].(string)); err != nil {
+		t.Errorf("Invalid ID format. Expected a valid UUIDv4 but got %q", responseBody["id"])
+	}
+}
