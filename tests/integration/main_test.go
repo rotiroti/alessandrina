@@ -2,11 +2,11 @@ package integration
 
 import (
 	"bytes"
+	"crypto/rand"
 	"encoding/json"
-	"math/rand"
+	"math/big"
 	"net/http"
 	"os"
-	"strconv"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
@@ -18,6 +18,15 @@ func skipIntegration(t *testing.T) {
 	if os.Getenv("INTEGRATION") == "" {
 		t.Skip("skipping integration tests, set environment variable INTEGRATION")
 	}
+}
+
+func generateRandomISBN() string {
+	const isbnDigits = 9999999999999
+	n, err := rand.Int(rand.Reader, big.NewInt(isbnDigits))
+	if err != nil {
+		panic(err)
+	}
+	return n.String()
 }
 
 func TestIntegrationCreateBook(t *testing.T) {
@@ -41,7 +50,7 @@ func TestIntegrationCreateBook(t *testing.T) {
 		"title":     gofakeit.BookTitle(),
 		"authors":   gofakeit.BookAuthor(),
 		"publisher": gofakeit.Company(),
-		"isbn":      strconv.Itoa(rand.Intn(9999999999999)),
+		"isbn":      generateRandomISBN(),
 		"pages":     gofakeit.Number(100, 1200),
 	}
 
