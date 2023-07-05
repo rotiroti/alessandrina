@@ -23,6 +23,7 @@ type Store struct {
 	tableName string
 }
 
+// Ensure Store implements the Storer interface.
 var _ domain.Storer = (*Store)(nil)
 
 // NewStore returns a new instance of Store.
