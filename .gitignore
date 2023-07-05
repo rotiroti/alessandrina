@@ -21,6 +21,8 @@ go.work
 # SAM CLI
 .aws-sam/
 samconfig.toml
+.env*
+env*
 
 # VS Code project files
 .vscode/
