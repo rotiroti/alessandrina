@@ -1,0 +1,64 @@
+config:
+  target: "{{ $processEnvironment.API_URL }}"
+  environments:
+    production:
+      target: "{{ $processEnvironment.API_URL }}"
+    testing:
+      target: "{{ $processEnvironment.API_URL }}"
+    local:
+      target: "http://127.0.0.1:3000"
+  ensure:
+    thresholds:
+      # p99 of response time must be <250:
+      - "http.response_time.p99": 250
+      # p95 of response time must be <100:
+      - "http.response_time.p95": 100
+  payload:
+    path: "./books50.csv"
+    fields:
+      - "title"
+      - "authors"
+      - "isbn"
+      # - "pages"    // TODO: check how to handle cast (int)
+      - "publisher"
+    order: "sequential"
+    skipHeader: true
+    cast: false
+  phases:
+    - name: "Warm up API"
+      duration: 10
+      arrivalRate: 10
+    - name: "Sustain 100 users for 3 minutes"
+      duration: 60
+      arrivalRate: 100
+    - name: "Spike to 1400 users"
+      duration: 10
+      arrivalRate: 1400
+    - name: "Sustain spike at 1400 users for 3 minutes"
+      duration: 180
+      arrivalRate: 1400
+    - name: "Scale down to 100 users"
+      duration: 10
+      arrivalRate: 100
+    - name: "Sustain 100 users for 3 minutes"
+      duration: 180
+      arrivalRate: 100
+    - name: "Ramp down to zero"
+      duration: 10
+      arrivalRate: 1
+scenarios:
+  - flow:
+    - post:
+        url: "/books"
+        headers:
+          Content-Type: "application/json"
+        json:
+          title: "{{ title }}"
+          authors: "{{ authors }}"
+          isbn: "{{ isbn }}"
+          # pages: "{{ pages }}"
+          publisher: "{{ publisher }}"
+        expect:
+          statusCode: 201
+          contentType: application/json
+          hasProperty: "id"
