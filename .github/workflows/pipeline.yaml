@@ -219,6 +219,32 @@ jobs:
         run: |
           make integration-tests API_URL=$API_URL
 
+  load-test:
+    if : github.ref == 'refs/heads/main'
+    needs: [deploy-testing]
+    runs-on: ubuntu-latest
+    container: artilleryio/artillery:latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Make reports directory
+        run: mkdir reports
+
+      - name: Execute load tests
+        env:
+          API_URL: ${{ needs.deploy-testing.outputs.api_url }}
+        run: API_URL=$API_URL /home/node/artillery/bin/run run -e testing -o reports/report.json tests/performance/load.yml
+
+      - name: Generate HTML report
+        run: /home/node/artillery/bin/run report -o reports/report reports/report.json
+
+      - name: Archive test report
+        uses: actions/upload-artifact@v3
+        with:
+          name: artillery-test-report
+          path: reports/*
+
   deploy-prod:
     if: github.ref == 'refs/heads/main'
     needs: [integration-test]
