@@ -35,9 +35,9 @@ func TestIntegrationCreateBook(t *testing.T) {
 	// Skip the integration test if the GO_RUN_INTEGRATION environment variable is not set
 	skipIntegration(t)
 
-	apiURL := os.Getenv("AWS_TESTING_API_URL")
+	apiURL := os.Getenv("API_URL")
 	if apiURL == "" {
-		t.Fatal("AWS_TESTING_API_URL environment variable is not set")
+		t.Fatal("API_URL environment variable is not set")
 	}
 
 	// Remove the trailing slash from the URL if it exists
