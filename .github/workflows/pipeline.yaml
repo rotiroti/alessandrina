@@ -77,8 +77,6 @@ jobs:
   build-and-deploy-feature:
     # this stage is triggered only for feature branches (feature*),
     # which will build the stack and deploy to a stack named with branch name.
-    # https://github.com/actions/setup-python
-    # https://github.com/aws-actions/configure-aws-credentials#notice-node12-deprecation-warning
     if: startsWith(github.ref, 'refs/heads/feature')
     needs: [test]
     runs-on: ubuntu-latest
@@ -109,149 +107,150 @@ jobs:
             --role-arn ${TESTING_CLOUDFORMATION_EXECUTION_ROLE} \
             --parameter-overrides "ParameterKey=Environment,ParameterValue=dev"
 
-  # build-and-package:
-  #   if: github.ref == 'refs/heads/main'
-  #   needs: [test]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: aws-actions/setup-sam@v2
-  #       with:
-  #         use-installer: true
+  build-and-package:
+    if: github.ref == 'refs/heads/main'
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
 
-  #     - name: Build resources
-  #       run: sam build --template ${SAM_TEMPLATE}
+      - name: Build resources
+        run: sam build --template ${SAM_TEMPLATE}
 
-  #     - name: Assume the testing pipeline user role
-  #       uses: aws-actions/configure-aws-credentials@v2
-  #       with:
-  #         aws-region: ${{ env.TESTING_REGION }}
-  #         role-to-assume: ${{ env.TESTING_PIPELINE_EXECUTION_ROLE }}
-  #         role-session-name: testing-packaging
-  #         role-duration-seconds: 3600
-  #         role-skip-session-tagging: true
+      - name: Assume the testing pipeline user role
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ${{ env.TESTING_REGION }}
+          role-to-assume: ${{ env.TESTING_PIPELINE_EXECUTION_ROLE }}
+          role-session-name: testing-packaging
+          role-duration-seconds: 3600
+          role-skip-session-tagging: true
 
-  #     - name: Upload artifacts to testing artifact buckets
-  #       run: |
-  #         sam package \
-  #           --s3-bucket ${TESTING_ARTIFACTS_BUCKET} \
-  #           --region ${TESTING_REGION} \
-  #           --output-template-file packaged-testing.yaml
+      - name: Upload artifacts to testing artifact buckets
+        run: |
+          sam package \
+            --s3-bucket ${TESTING_ARTIFACTS_BUCKET} \
+            --region ${TESTING_REGION} \
+            --output-template-file packaged-testing.yaml
 
-  #     - uses: actions/upload-artifact@v3
-  #       with:
-  #         name: packaged-testing.yaml
-  #         path: packaged-testing.yaml
+      - uses: actions/upload-artifact@v3
+        with:
+          name: packaged-testing.yaml
+          path: packaged-testing.yaml
 
-  #     - name: Assume the prod pipeline user role
-  #       uses: aws-actions/configure-aws-credentials@v2
-  #       with:
-  #         aws-region: ${{ env.PROD_REGION }}
-  #         role-to-assume: ${{ env.PROD_PIPELINE_EXECUTION_ROLE }}
-  #         role-session-name: prod-packaging
-  #         role-duration-seconds: 3600
-  #         role-skip-session-tagging: true
+      - name: Assume the prod pipeline user role
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ${{ env.PROD_REGION }}
+          role-to-assume: ${{ env.PROD_PIPELINE_EXECUTION_ROLE }}
+          role-session-name: prod-packaging
+          role-duration-seconds: 3600
+          role-skip-session-tagging: true
 
-  #     - name: Upload artifacts to production artifact buckets
-  #       run: |
-  #         sam package \
-  #           --s3-bucket ${PROD_ARTIFACTS_BUCKET} \
-  #           --region ${PROD_REGION} \
-  #           --output-template-file packaged-prod.yaml
+      - name: Upload artifacts to production artifact buckets
+        run: |
+          sam package \
+            --s3-bucket ${PROD_ARTIFACTS_BUCKET} \
+            --region ${PROD_REGION} \
+            --output-template-file packaged-prod.yaml
 
-  #     - uses: actions/upload-artifact@v3
-  #       with:
-  #         name: packaged-prod.yaml
-  #         path: packaged-prod.yaml
+      - uses: actions/upload-artifact@v3
+        with:
+          name: packaged-prod.yaml
+          path: packaged-prod.yaml
 
-  # deploy-testing:
-  #   if: github.ref == 'refs/heads/main'
-  #   outputs:
-  #     api_url: ${{ steps.testing.outputs.api_url }}
-  #   needs: [build-and-package]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: aws-actions/setup-sam@v2
-  #       with:
-  #         use-installer: true
-  #     - uses: actions/download-artifact@v3
-  #       with:
-  #         name: packaged-testing.yaml
+  deploy-testing:
+    if: github.ref == 'refs/heads/main'
+    outputs:
+      api_url: ${{ steps.testing.outputs.api_url }}
+    needs: [build-and-package]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+      - uses: actions/download-artifact@v3
+        with:
+          name: packaged-testing.yaml
 
-  #     - name: Assume the testing pipeline user role
-  #       uses: aws-actions/configure-aws-credentials@v2
-  #       with:
-  #         aws-region: ${{ env.TESTING_REGION }}
-  #         role-to-assume: ${{ env.TESTING_PIPELINE_EXECUTION_ROLE }}
-  #         role-session-name: testing-deployment
-  #         role-duration-seconds: 3600
-  #         role-skip-session-tagging: true
+      - name: Assume the testing pipeline user role
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ${{ env.TESTING_REGION }}
+          role-to-assume: ${{ env.TESTING_PIPELINE_EXECUTION_ROLE }}
+          role-session-name: testing-deployment
+          role-duration-seconds: 3600
+          role-skip-session-tagging: true
 
-  #     - name: Deploy to testing account
-  #       run: |
-  #         sam deploy --stack-name ${TESTING_STACK_NAME} \
-  #           --template packaged-testing.yaml \
-  #           --capabilities CAPABILITY_IAM \
-  #           --region ${TESTING_REGION} \
-  #           --s3-bucket ${TESTING_ARTIFACTS_BUCKET} \
-  #           --no-fail-on-empty-changeset \
-  #           --role-arn ${TESTING_CLOUDFORMATION_EXECUTION_ROLE}
+      - name: Deploy to testing account
+        run: |
+          sam deploy --stack-name ${TESTING_STACK_NAME} \
+            --template packaged-testing.yaml \
+            --capabilities CAPABILITY_IAM \
+            --region ${TESTING_REGION} \
+            --s3-bucket ${TESTING_ARTIFACTS_BUCKET} \
+            --no-fail-on-empty-changeset \
+            --role-arn ${TESTING_CLOUDFORMATION_EXECUTION_ROLE} \
+            --parameter-overrides "ParameterKey=Environment,ParameterValue=dev"
 
-  #     - name: Extract testing API url
-  #       id: testing
-  #       run: |
-  #         AWS_TESTING_API_URL=$(sam list stack-outputs --stack-name ${TESTING_STACK_NAME} --region ${TESTING_REGION} --output json | jq -r '.[0].OutputValue')
-  #         # echo "::set-output name=api_url::$AWS_TESTING_API_URL"
-  #         echo "api_url=$AWS_TESTING_API_URL" >> $GITHUB_OUTPUT
+      - name: Extract testing API url
+        id: testing
+        run: |
+          API_URL=$(sam list stack-outputs --stack-name ${TESTING_STACK_NAME} --region ${TESTING_REGION} --output json | jq -r '.[0].OutputValue')
+          echo "api_url=$API_URL" >> $GITHUB_OUTPUT
     
-  # integration-test:
-  #   if: github.ref == 'refs/heads/main'
-  #   needs: [deploy-testing]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Set up Go
-  #       uses: actions/setup-go@v4
-  #       with:
-  #         go-version: 'stable'
-  #     - name: Run Integration tests
-  #       env:
-  #         AWS_TESTING_API_URL: ${{ needs.deploy-testing.outputs.api_url }}
-  #       run: |
-  #         make integration-tests AWS_TESTING_API_URL=$AWS_TESTING_API_URL
+  integration-test:
+    if: github.ref == 'refs/heads/main'
+    needs: [deploy-testing]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 'stable'
+      - name: Run Integration tests
+        env:
+          API_URL: ${{ needs.deploy-testing.outputs.api_url }}
+        run: |
+          make integration-tests API_URL=$API_URL
 
-  # deploy-prod:
-  #   if: github.ref == 'refs/heads/main'
-  #   needs: [integration-test]
-  #   runs-on: ubuntu-latest
-  #   # Configure GitHub Action Environment to have a manual approval step before deployment to production
-  #   # https://docs.github.com/en/actions/reference/environments
-  #   # environment: <configured-environment>
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: aws-actions/setup-sam@v2
-  #       with:
-  #         use-installer: true
-  #     - uses: actions/download-artifact@v3
-  #       with:
-  #         name: packaged-prod.yaml
+  deploy-prod:
+    if: github.ref == 'refs/heads/main'
+    needs: [integration-test]
+    runs-on: ubuntu-latest
+    # Configure GitHub Action Environment to have a manual approval step before deployment to production
+    # https://docs.github.com/en/actions/reference/environments
+    # environment: <configured-environment>
+    steps:
+      - uses: actions/checkout@v3
+      - uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+      - uses: actions/download-artifact@v3
+        with:
+          name: packaged-prod.yaml
 
-  #     - name: Assume the prod pipeline user role
-  #       uses: aws-actions/configure-aws-credentials@v2
-  #       with:
-  #         aws-region: ${{ env.PROD_REGION }}
-  #         role-to-assume: ${{ env.PROD_PIPELINE_EXECUTION_ROLE }}
-  #         role-session-name: prod-deployment
-  #         role-duration-seconds: 3600
-  #         role-skip-session-tagging: true
+      - name: Assume the prod pipeline user role
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ${{ env.PROD_REGION }}
+          role-to-assume: ${{ env.PROD_PIPELINE_EXECUTION_ROLE }}
+          role-session-name: prod-deployment
+          role-duration-seconds: 3600
+          role-skip-session-tagging: true
 
-  #     - name: Deploy to production account
-  #       run: |
-  #         sam deploy --stack-name ${PROD_STACK_NAME} \
-  #           --template packaged-prod.yaml \
-  #           --capabilities CAPABILITY_IAM \
-  #           --region ${PROD_REGION} \
-  #           --s3-bucket ${PROD_ARTIFACTS_BUCKET} \
-  #           --no-fail-on-empty-changeset \
-  #           --role-arn ${PROD_CLOUDFORMATION_EXECUTION_ROLE}
+      - name: Deploy to production account
+        run: |
+          sam deploy --stack-name ${PROD_STACK_NAME} \
+            --template packaged-prod.yaml \
+            --capabilities CAPABILITY_IAM \
+            --region ${PROD_REGION} \
+            --s3-bucket ${PROD_ARTIFACTS_BUCKET} \
+            --no-fail-on-empty-changeset \
+            --role-arn ${PROD_CLOUDFORMATION_EXECUTION_ROLE} \
+            --parameter-overrides "ParameterKey=Environment,ParameterValue=prod"

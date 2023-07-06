@@ -1,7 +1,13 @@
-AWS_TESTING_API_URL = http://localhost:3000
+API_URL = http://localhost:3000
 CUR_DIR = $(shell echo "${PWD}")
 
 .PHONY: unit-tests integration-tests coverage format clean mocks remove-mocks lint
+
+build-CreateBookFunction:
+	@echo "Building CreateBookFunction"
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o create-book github.com/rotiroti/alessandrina/functions/create-book/
+	mv create-book $(ARTIFACTS_DIR)
+	@echo "Built CreateBookFunction successfully"
 
 format:
 	@echo "Format code"
@@ -21,13 +27,7 @@ coverage: unit-tests
 
 integration-tests:
 	@echo "Run integration tests"
-	AWS_TESTING_API_URL=${AWS_TESTING_API_URL} INTEGRATION=1 go test -count=1 -v -race ./tests/...
-
-build-CreateBookFunction:
-	@echo "Building CreateBookFunction"
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o create-book github.com/rotiroti/alessandrina/functions/create-book/
-	mv create-book $(ARTIFACTS_DIR)
-	@echo "Built CreateBookFunction successfully"
+	API_URL=${API_URL} INTEGRATION=1 go test -count=1 -v -race ./tests/...
 
 mocks:
 	@echo "Generate mocks"
