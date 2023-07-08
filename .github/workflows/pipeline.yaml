@@ -9,22 +9,22 @@ on:
 
 env:
   SAM_TEMPLATE: template.yaml
-  TESTING_STACK_NAME: alessandrina-dev
-  TESTING_PIPELINE_EXECUTION_ROLE: ${{ secrets.TESTING_PIPELINE_EXECUTION_ROLE }}
-  TESTING_CLOUDFORMATION_EXECUTION_ROLE: ${{ secrets.TESTING_CLOUDFORMATION_EXECUTION_ROLE }}
-  TESTING_ARTIFACTS_BUCKET: ${{ secrets.TESTING_ARTIFACTS_BUCKET }}
-  TESTING_REGION: ${{ secrets.TESTING_REGION }}
+  DEV_STACK_NAME: alessandrina-dev
+  DEV_PIPELINE_EXECUTION_ROLE: ${{ secrets.DEV_PIPELINE_EXECUTION_ROLE }}
+  DEV_CLOUDFORMATION_EXECUTION_ROLE: ${{ secrets.DEV_CLOUDFORMATION_EXECUTION_ROLE }}
+  DEV_ARTIFACTS_BUCKET: ${{ secrets.DEV_ARTIFACTS_BUCKET }}
+  DEV_REGION: us-east-1
   PROD_STACK_NAME: alessandrina-prod
   PROD_PIPELINE_EXECUTION_ROLE: ${{ secrets.PROD_PIPELINE_EXECUTION_ROLE }}
   PROD_CLOUDFORMATION_EXECUTION_ROLE: ${{ secrets.PROD_CLOUDFORMATION_EXECUTION_ROLE }}
   PROD_ARTIFACTS_BUCKET: ${{ secrets.PROD_ARTIFACTS_BUCKET }}
-  PROD_REGION: ${{ secrets.PROD_REGION }}
+  PROD_REGION: us-east-1
 
 permissions:
   id-token: write
   contents: read
 jobs:
-  test:
+  unit-tests:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
@@ -38,6 +38,7 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: v1.53
+          skip-cache: true
 
       - name: Run Unit Tests
         run: make coverage
@@ -56,12 +57,12 @@ jobs:
         with:
           use-installer: true
 
-      - name: Assume the testing pipeline user role
+      - name: Assume the dev pipeline user role
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-region: ${{ env.TESTING_REGION }}
-          role-to-assume: ${{ env.TESTING_PIPELINE_EXECUTION_ROLE }}
-          role-session-name: testing-packaging
+          aws-region: ${{ env.DEV_REGION }}
+          role-to-assume: ${{ env.DEV_PIPELINE_EXECUTION_ROLE }}
+          role-session-name: dev-packaging
           role-duration-seconds: 3600
           role-skip-session-tagging: true
 
@@ -71,14 +72,14 @@ jobs:
         run: |
           sam delete \
             --stack-name $(echo ${FEATURE_BRANCH_NAME##*/} | tr -cd '[a-zA-Z0-9-]') \
-            --region ${TESTING_REGION} \
+            --region ${DEV_REGION} \
             --no-prompts
 
   build-and-deploy-feature:
     # this stage is triggered only for feature branches (feature*),
     # which will build the stack and deploy to a stack named with branch name.
     if: startsWith(github.ref, 'refs/heads/feature')
-    needs: [test]
+    needs: [unit-tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -87,29 +88,28 @@ jobs:
           use-installer: true
       - run: sam build --template ${SAM_TEMPLATE}
 
-      - name: Assume the testing pipeline user role
+      - name: Assume the dev pipeline user role
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-region: ${{ env.TESTING_REGION }}
-          role-to-assume: ${{ env.TESTING_PIPELINE_EXECUTION_ROLE }}
+          aws-region: ${{ env.DEV_REGION }}
+          role-to-assume: ${{ env.DEV_PIPELINE_EXECUTION_ROLE }}
           role-session-name: feature-deployment
           role-duration-seconds: 3600
           role-skip-session-tagging: true
 
-      - name: Deploy to feature stack in the testing account
+      - name: Deploy to feature stack in the dev account
         shell: bash
         run: |
           sam deploy --stack-name $(echo ${GITHUB_REF##*/} | tr -cd '[a-zA-Z0-9-]') \
             --capabilities CAPABILITY_IAM \
-            --region ${TESTING_REGION} \
-            --s3-bucket ${TESTING_ARTIFACTS_BUCKET} \
+            --region ${DEV_REGION} \
+            --s3-bucket ${DEV_ARTIFACTS_BUCKET} \
             --no-fail-on-empty-changeset \
-            --role-arn ${TESTING_CLOUDFORMATION_EXECUTION_ROLE} \
-            --parameter-overrides "ParameterKey=Environment,ParameterValue=dev"
+            --role-arn ${DEV_CLOUDFORMATION_EXECUTION_ROLE}
 
   build-and-package:
     if: github.ref == 'refs/heads/main'
-    needs: [test]
+    needs: [unit-tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -120,26 +120,26 @@ jobs:
       - name: Build resources
         run: sam build --template ${SAM_TEMPLATE}
 
-      - name: Assume the testing pipeline user role
+      - name: Assume the dev pipeline user role
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-region: ${{ env.TESTING_REGION }}
-          role-to-assume: ${{ env.TESTING_PIPELINE_EXECUTION_ROLE }}
-          role-session-name: testing-packaging
+          aws-region: ${{ env.DEV_REGION }}
+          role-to-assume: ${{ env.DEV_PIPELINE_EXECUTION_ROLE }}
+          role-session-name: dev-packaging
           role-duration-seconds: 3600
           role-skip-session-tagging: true
 
-      - name: Upload artifacts to testing artifact buckets
+      - name: Upload artifacts to dev artifact buckets
         run: |
           sam package \
-            --s3-bucket ${TESTING_ARTIFACTS_BUCKET} \
-            --region ${TESTING_REGION} \
-            --output-template-file packaged-testing.yaml
+            --s3-bucket ${DEV_ARTIFACTS_BUCKET} \
+            --region ${DEV_REGION} \
+            --output-template-file packaged-dev.yaml
 
       - uses: actions/upload-artifact@v3
         with:
-          name: packaged-testing.yaml
-          path: packaged-testing.yaml
+          name: packaged-dev.yaml
+          path: packaged-dev.yaml
 
       - name: Assume the prod pipeline user role
         uses: aws-actions/configure-aws-credentials@v2
@@ -162,10 +162,10 @@ jobs:
           name: packaged-prod.yaml
           path: packaged-prod.yaml
 
-  deploy-testing:
+  deploy-dev:
     if: github.ref == 'refs/heads/main'
     outputs:
-      api_url: ${{ steps.testing.outputs.api_url }}
+      API_URL: ${{ steps.deploy.outputs.API_URL }}
     needs: [build-and-package]
     runs-on: ubuntu-latest
     steps:
@@ -175,37 +175,38 @@ jobs:
           use-installer: true
       - uses: actions/download-artifact@v3
         with:
-          name: packaged-testing.yaml
+          name: packaged-dev.yaml
 
-      - name: Assume the testing pipeline user role
+      - name: Assume the dev pipeline user role
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-region: ${{ env.TESTING_REGION }}
-          role-to-assume: ${{ env.TESTING_PIPELINE_EXECUTION_ROLE }}
-          role-session-name: testing-deployment
+          aws-region: ${{ env.DEV_REGION }}
+          role-to-assume: ${{ env.DEV_PIPELINE_EXECUTION_ROLE }}
+          role-session-name: dev-deployment
           role-duration-seconds: 3600
           role-skip-session-tagging: true
 
-      - name: Deploy to testing account
+      - name: Deploy to dev account
         run: |
-          sam deploy --stack-name ${TESTING_STACK_NAME} \
-            --template packaged-testing.yaml \
+          sam deploy --stack-name ${DEV_STACK_NAME} \
+            --template packaged-dev.yaml \
             --capabilities CAPABILITY_IAM \
-            --region ${TESTING_REGION} \
-            --s3-bucket ${TESTING_ARTIFACTS_BUCKET} \
+            --region ${DEV_REGION} \
+            --s3-bucket ${DEV_ARTIFACTS_BUCKET} \
             --no-fail-on-empty-changeset \
-            --role-arn ${TESTING_CLOUDFORMATION_EXECUTION_ROLE} \
-            --parameter-overrides "ParameterKey=Environment,ParameterValue=dev"
+            --role-arn ${DEV_CLOUDFORMATION_EXECUTION_ROLE}
 
-      - name: Extract testing API url
-        id: testing
+      - name: Extract API URL and save for the next "integration tests" step
+        id: deploy
         run: |
-          API_URL=$(sam list stack-outputs --stack-name ${TESTING_STACK_NAME} --region ${TESTING_REGION} --output json | jq -r '.[0].OutputValue')
-          echo "api_url=$API_URL" >> $GITHUB_OUTPUT
-    
-  integration-test:
+          API_URL=$(sam list stack-outputs --stack-name ${DEV_STACK_NAME} --region ${DEV_REGION} --output json | jq -r '.[] | select(.OutputKey=="WebEndpoint")|.OutputValue')
+          echo "API_URL=${API_URL}" >> $GITHUB_OUTPUT
+
+  integration-tests:
     if: github.ref == 'refs/heads/main'
-    needs: [deploy-testing]
+    needs: [deploy-dev]
+    outputs:
+      API_URL: ${{ steps.integration.outputs.API_URL }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -213,15 +214,18 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: 'stable'
-      - name: Run Integration tests
-        env:
-          API_URL: ${{ needs.deploy-testing.outputs.api_url }}
-        run: |
-          make integration-tests API_URL=$API_URL
 
-  load-test:
-    if : github.ref == 'refs/heads/main'
-    needs: [deploy-testing]
+      - name: Run Integration tests
+        run: make integration-tests API_URL=${{ needs.deploy-dev.outputs.API_URL }}
+
+      - name: Extract API URL and save for the next "integration tests" step
+        id: integration
+        run: |
+          echo "API_URL=${{ needs.deploy-dev.outputs.API_URL }}" >> $GITHUB_OUTPUT
+
+  load-tests:
+    if: github.ref == 'refs/heads/main'
+    needs: [integration-tests]
     runs-on: ubuntu-latest
     container: artilleryio/artillery:latest
     steps:
@@ -231,13 +235,14 @@ jobs:
       - name: Make reports directory
         run: mkdir reports
 
+      - name: Get API URL
+        run: echo "API_URL=${{ needs.integration-tests.outputs.API_URL }}" >> $GITHUB_ENV
+
       - name: Execute load tests
-        env:
-          API_URL: ${{ needs.deploy-testing.outputs.api_url }}
-        run: API_URL=$API_URL /home/node/artillery/bin/run run -e testing -o reports/report.json tests/performance/load.yml
+        run: API_URL=${{ env.API_URL }} /home/node/artillery/bin/run run --output reports/report.json --environment=development tests/performance/load.yml
 
       - name: Generate HTML report
-        run: /home/node/artillery/bin/run report -o reports/report reports/report.json
+        run: /home/node/artillery/bin/run report --output reports/report.html reports/report.json
 
       - name: Archive test report
         uses: actions/upload-artifact@v3
@@ -247,7 +252,7 @@ jobs:
 
   deploy-prod:
     if: github.ref == 'refs/heads/main'
-    needs: [integration-test]
+    needs: [load-tests]
     runs-on: ubuntu-latest
     # Configure GitHub Action Environment to have a manual approval step before deployment to production
     # https://docs.github.com/en/actions/reference/environments
@@ -278,5 +283,4 @@ jobs:
             --region ${PROD_REGION} \
             --s3-bucket ${PROD_ARTIFACTS_BUCKET} \
             --no-fail-on-empty-changeset \
-            --role-arn ${PROD_CLOUDFORMATION_EXECUTION_ROLE} \
-            --parameter-overrides "ParameterKey=Environment,ParameterValue=prod"
+            --role-arn ${PROD_CLOUDFORMATION_EXECUTION_ROLE}

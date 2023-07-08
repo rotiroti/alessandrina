@@ -9,26 +9,15 @@ Globals:
     Tracing: Active
     Architectures: [x86_64]
     AutoPublishAlias: !Ref Environment
+    DeploymentPreference:
+      Type: AllAtOnce
 
 Parameters:
   Environment:
     Type: String
     Default: dev
-    AllowedValues:
-      - dev
-      - prod
+    AllowedValues: [dev, prod]
     Description: Environment of this stack of resources
-
-Mappings:
-  ResourcesNameMap:
-    dev:
-      BooksAPI: BooksAPI-dev
-      BooksTable: BooksTable-dev
-      CreateBookFunction: CreateBookFunction-dev
-    prod:
-      BooksAPI: BooksAPI-prod
-      BooksTable: BooksTable-prod
-      CreateBookFunction: CreateBookFunction-prod
 
 Resources:
   BooksAPI:
@@ -37,13 +26,12 @@ Resources:
   BooksTable:
     Type: AWS::Serverless::SimpleTable
     Properties:
-      TableName: !FindInMap [ResourcesNameMap, !Ref Environment, BooksTable]
       PrimaryKey:
         Name: id
         Type: String
       ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
+        ReadCapacityUnits: 10
+        WriteCapacityUnits: 10
 
   CreateBookFunction:
     Type: AWS::Serverless::Function

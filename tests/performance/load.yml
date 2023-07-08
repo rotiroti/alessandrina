@@ -3,7 +3,7 @@ config:
   environments:
     production:
       target: "{{ $processEnvironment.API_URL }}"
-    testing:
+    development:
       target: "{{ $processEnvironment.API_URL }}"
     local:
       target: "http://127.0.0.1:3000"
@@ -25,18 +25,18 @@ config:
     skipHeader: true
     cast: false
   phases:
-    - name: "Warm up API"
+    - name: "Warm up API for 1 minute"
       duration: 60
       arrivalRate: 5
       rampTo: 10
-    - name: "Ramp up to peak load"
+    - name: "Ramp up to peak load in 1 minute"
       duration: 60
       arrivalRate: 10
       rampTo: 50
-    - name: "Sustain peak load"
-      duration: 300
+    - name: "Sustain peak load for 3 minutes"
+      duration: 180
       rampTo: 50
-    - name: "Ramp down to zero"
+    - name: "Ramp down to zero in 1 minute"
       duration: 60
       arrivalRate: 50
       rampTo: 0

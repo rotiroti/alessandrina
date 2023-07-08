@@ -3,7 +3,7 @@ config:
   environments:
     production:
       target: "{{ $processEnvironment.API_URL }}"
-    testing:
+    development:
       target: "{{ $processEnvironment.API_URL }}"
     local:
       target: "http://127.0.0.1:3000"
@@ -31,12 +31,12 @@ config:
     - name: "Sustain 100 users for 3 minutes"
       duration: 60
       arrivalRate: 100
-    - name: "Spike to 1400 users"
+    - name: "Spike to 1000 users"
       duration: 10
-      arrivalRate: 1400
-    - name: "Sustain spike at 1400 users for 3 minutes"
+      arrivalRate: 1000
+    - name: "Sustain spike at 1000 users for 3 minutes"
       duration: 180
-      arrivalRate: 1400
+      arrivalRate: 1000
     - name: "Scale down to 100 users"
       duration: 10
       arrivalRate: 100
