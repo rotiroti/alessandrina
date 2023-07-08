@@ -1,4 +1,4 @@
-name: Clenaup Alessandrina stacks
+name: Cleanup Alessandrina stacks
 
 on:
   workflow_dispatch:

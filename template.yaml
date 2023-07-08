@@ -10,7 +10,7 @@ Globals:
     Architectures: [x86_64]
     AutoPublishAlias: !Ref Environment
     DeploymentPreference:
-      Type: AllAtOnce
+      Type: Canary10Percent5Minutes
 
 Parameters:
   Environment:
