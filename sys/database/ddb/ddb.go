@@ -7,6 +7,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/google/uuid"
 	"github.com/rotiroti/alessandrina/domain"
 )
 
@@ -15,6 +17,7 @@ import (
 //go:generate mockery --name DynamoDB
 type DynamodbAPI interface {
 	PutItem(ctx context.Context, params *dynamodb.PutItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error)
+	GetItem(ctx context.Context, params *dynamodb.GetItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.GetItemOutput, error)
 }
 
 // Store is a DynamoDB implementation of the Storer interface.
@@ -51,4 +54,27 @@ func (s *Store) Save(ctx context.Context, book domain.Book) error {
 	}
 
 	return nil
+}
+
+// FindOne returns a book from the DynamoDB database by using bookID as primary key.
+func (s *Store) FindOne(ctx context.Context, bookID uuid.UUID) (domain.Book, error) {
+	item := DynamodbBook{ID: bookID.String()}
+	response, err := s.api.GetItem(ctx, &dynamodb.GetItemInput{
+		TableName: aws.String(s.tableName),
+		Key: map[string]types.AttributeValue{
+			"id": &types.AttributeValueMemberS{Value: item.ID},
+		},
+	})
+
+	if err != nil {
+		return domain.Book{}, fmt.Errorf("findbyid: getitem[%v]: %w", bookID, err)
+	}
+
+	if err = attributevalue.UnmarshalMap(response.Item, &item); err != nil {
+		return domain.Book{}, fmt.Errorf("findbyid: unmarshalmap: %w", err)
+	}
+
+	book := ToDomainBook(item)
+
+	return book, nil
 }

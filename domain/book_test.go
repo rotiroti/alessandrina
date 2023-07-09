@@ -106,3 +106,69 @@ func TestSaveFail(t *testing.T) {
 	// Assert that the mockStorer's expectations were met
 	mockStorer.AssertExpectations(t)
 }
+
+func TestFindOne(t *testing.T) {
+	t.Parallel()
+
+	// Create a mock instance of the Storer interface
+	mockStorer := domain.NewMockStorer(t)
+
+	// Generate a fixed UUID for the test
+	expectedID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812")
+
+	// Create an instance of the Service struct with the mockStorer
+	service := domain.NewService(mockStorer)
+
+	// Set up the expected inputs and outputs
+	ctx := context.TODO()
+	expectedBook := domain.Book{
+		ID:        expectedID,
+		Title:     "Test Book",
+		Authors:   "Test Authors",
+		Publisher: "Test Publisher",
+		ISBN:      "Test ISBN",
+		Pages:     100,
+	}
+
+	// Set up the expectations for the mockStorer's FindOne method
+	mockStorer.EXPECT().FindOne(ctx, expectedID).Return(expectedBook, nil).Once()
+
+	// Call the FindOne method of the service
+	foundBook, err := service.FindOne(ctx, expectedID)
+
+	// Assert the expected output
+	assert.NoError(t, err)
+	assert.Equal(t, expectedBook, foundBook)
+
+	// Assert that the mockStorer's expectations were met
+	mockStorer.AssertExpectations(t)
+}
+
+func TestFindOneFail(t *testing.T) {
+	t.Parallel()
+
+	// Create a mock instance of the Storer interface
+	mockStorer := domain.NewMockStorer(t)
+
+	// Generate a fixed UUID for the test
+	bookID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812")
+
+	// Create an instance of the Service struct with the mockStorer
+	service := domain.NewService(mockStorer)
+
+	// Set up the expected inputs and outputs
+	ctx := context.TODO()
+
+	// Set up the expectations for the mockStorer's FindOne method
+	mockStorer.EXPECT().FindOne(ctx, bookID).Return(domain.Book{}, assert.AnError).Once()
+
+	// Call the FindOne method of the service
+	foundBook, err := service.FindOne(ctx, bookID)
+
+	// Assert the expected output
+	assert.Error(t, err)
+	assert.Equal(t, domain.Book{}, foundBook)
+
+	// Assert that the mockStorer's expectations were met
+	mockStorer.AssertExpectations(t)
+}

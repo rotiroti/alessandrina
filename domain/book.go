@@ -24,6 +24,7 @@ type UUIDGenerator func() uuid.UUID
 //go:generate mockery --name Storer
 type Storer interface {
 	Save(ctx context.Context, book Book) error
+	FindOne(ctx context.Context, bookID uuid.UUID) (Book, error)
 }
 
 // Service is the domain service for Book.
@@ -58,6 +59,16 @@ func (s *Service) Save(ctx context.Context, nb NewBook) (Book, error) {
 
 	if err := s.storer.Save(ctx, book); err != nil {
 		return Book{}, fmt.Errorf("save: %w", err)
+	}
+
+	return book, nil
+}
+
+// FindOne returns a book from a storage by using bookID as primary key.
+func (s *Service) FindOne(ctx context.Context, bookID uuid.UUID) (Book, error) {
+	book, err := s.storer.FindOne(ctx, bookID)
+	if err != nil {
+		return Book{}, fmt.Errorf("findone: bookID[%s]: %w", bookID, err)
 	}
 
 	return book, nil

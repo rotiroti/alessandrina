@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/rotiroti/alessandrina/domain"
 )
 
@@ -35,4 +36,17 @@ func (s *Store) Save(_ context.Context, book domain.Book) error {
 	s.container[book.ID.String()] = book
 
 	return nil
+}
+
+// FindOne returns a book from the in-memory database.
+func (s *Store) FindOne(_ context.Context, bookID uuid.UUID) (domain.Book, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	book, exists := s.container[bookID.String()]
+	if !exists {
+		return domain.Book{}, domain.ErrNotFound
+	}
+
+	return book, nil
 }

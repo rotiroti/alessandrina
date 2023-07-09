@@ -3,6 +3,7 @@ package ddb
 import (
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/rotiroti/alessandrina/domain"
 )
 
@@ -27,6 +28,18 @@ func (b DynamodbBook) String() string {
 func ToDynamodbBook(book domain.Book) DynamodbBook {
 	return DynamodbBook{
 		ID:        book.ID.String(),
+		Title:     book.Title,
+		Authors:   book.Authors,
+		Publisher: book.Publisher,
+		Pages:     book.Pages,
+		ISBN:      book.ISBN,
+	}
+}
+
+// ToDomainBook converts a DynamoDBBook to a domain.Book.
+func ToDomainBook(book DynamodbBook) domain.Book {
+	return domain.Book{
+		ID:        uuid.MustParse(book.ID),
 		Title:     book.Title,
 		Authors:   book.Authors,
 		Publisher: book.Publisher,

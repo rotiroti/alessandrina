@@ -36,4 +36,21 @@ func TestMemoryStore(t *testing.T) {
 		err2 := store.Save(context.Background(), book)
 		require.ErrorIs(t, err2, domain.ErrAlreadyExists)
 	})
+
+	t.Run("should return a book by ID", func(t *testing.T) {
+		t.Parallel()
+		store := memory.NewStore()
+		err := store.Save(context.Background(), book)
+		require.NoError(t, err)
+		ret, err2 := store.FindOne(context.Background(), book.ID)
+		require.NoError(t, err2)
+		require.Equal(t, book, ret)
+	})
+
+	t.Run("should throw error for unfound book ID", func(t *testing.T) {
+		t.Parallel()
+		store := memory.NewStore()
+		_, err := store.FindOne(context.Background(), book.ID)
+		require.ErrorIs(t, err, domain.ErrNotFound)
+	})
 }
