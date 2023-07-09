@@ -242,7 +242,7 @@ jobs:
         run: echo "API_URL=${{ needs.integration-tests.outputs.API_URL }}" >> $GITHUB_ENV
 
       - name: Execute load tests
-        run: API_URL=${{ env.API_URL }} /home/node/artillery/bin/run run --output reports/create-book.json --environment=development tests/performance/create-book/load.yml
+        run: API_URL=${{ env.API_URL }} /home/node/artillery/bin/run run --output reports/create-book.json --environment=development tests/performance/create-book-load.yml
 
       - name: Generate HTML report
         run: /home/node/artillery/bin/run report --output reports/create-book.html reports/create-book.json
