@@ -22,6 +22,76 @@ func (_m *MockDynamodbAPI) EXPECT() *MockDynamodbAPI_Expecter {
 	return &MockDynamodbAPI_Expecter{mock: &_m.Mock}
 }
 
+// GetItem provides a mock function with given fields: ctx, params, optFns
+func (_m *MockDynamodbAPI) GetItem(ctx context.Context, params *dynamodb.GetItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.GetItemOutput, error) {
+	_va := make([]interface{}, len(optFns))
+	for _i := range optFns {
+		_va[_i] = optFns[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *dynamodb.GetItemOutput
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *dynamodb.GetItemInput, ...func(*dynamodb.Options)) (*dynamodb.GetItemOutput, error)); ok {
+		return rf(ctx, params, optFns...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *dynamodb.GetItemInput, ...func(*dynamodb.Options)) *dynamodb.GetItemOutput); ok {
+		r0 = rf(ctx, params, optFns...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*dynamodb.GetItemOutput)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *dynamodb.GetItemInput, ...func(*dynamodb.Options)) error); ok {
+		r1 = rf(ctx, params, optFns...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockDynamodbAPI_GetItem_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetItem'
+type MockDynamodbAPI_GetItem_Call struct {
+	*mock.Call
+}
+
+// GetItem is a helper method to define mock.On call
+//   - ctx context.Context
+//   - params *dynamodb.GetItemInput
+//   - optFns ...func(*dynamodb.Options)
+func (_e *MockDynamodbAPI_Expecter) GetItem(ctx interface{}, params interface{}, optFns ...interface{}) *MockDynamodbAPI_GetItem_Call {
+	return &MockDynamodbAPI_GetItem_Call{Call: _e.mock.On("GetItem",
+		append([]interface{}{ctx, params}, optFns...)...)}
+}
+
+func (_c *MockDynamodbAPI_GetItem_Call) Run(run func(ctx context.Context, params *dynamodb.GetItemInput, optFns ...func(*dynamodb.Options))) *MockDynamodbAPI_GetItem_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]func(*dynamodb.Options), len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(func(*dynamodb.Options))
+			}
+		}
+		run(args[0].(context.Context), args[1].(*dynamodb.GetItemInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockDynamodbAPI_GetItem_Call) Return(_a0 *dynamodb.GetItemOutput, _a1 error) *MockDynamodbAPI_GetItem_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockDynamodbAPI_GetItem_Call) RunAndReturn(run func(context.Context, *dynamodb.GetItemInput, ...func(*dynamodb.Options)) (*dynamodb.GetItemOutput, error)) *MockDynamodbAPI_GetItem_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // PutItem provides a mock function with given fields: ctx, params, optFns
 func (_m *MockDynamodbAPI) PutItem(ctx context.Context, params *dynamodb.PutItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error) {
 	_va := make([]interface{}, len(optFns))

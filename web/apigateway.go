@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/google/uuid"
 	"github.com/rotiroti/alessandrina/domain"
 )
 
@@ -36,6 +37,21 @@ func (h *APIGatewayV2Handler) CreateBook(ctx context.Context, req events.APIGate
 	}
 
 	return jsonResponse(http.StatusCreated, ToAppBook(book)), nil
+}
+
+// GetBook handles requests for getting a book by a given ID (UUID).
+func (h *APIGatewayV2Handler) GetBook(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
+	id, err := uuid.Parse(req.PathParameters["id"])
+	if err != nil {
+		return errorResponse(http.StatusBadRequest, err.Error()), err
+	}
+
+	book, err := h.service.FindOne(ctx, id)
+	if err != nil {
+		return errorResponse(http.StatusInternalServerError, err.Error()), err
+	}
+
+	return jsonResponse(http.StatusOK, ToAppBook(book)), nil
 }
 
 func jsonResponse(code int, obj any) events.APIGatewayV2HTTPResponse {
