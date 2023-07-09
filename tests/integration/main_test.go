@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/json"
+	"fmt"
 	"math/big"
 	"net/http"
 	"os"
@@ -35,7 +36,6 @@ func TestIntegrationFlow(t *testing.T) {
 	// Skip the integration test if the GO_RUN_INTEGRATION environment variable is not set
 	skipIntegration(t)
 
-	// Get the API URL from the environment
 	apiURL := os.Getenv("API_URL")
 	if apiURL == "" {
 		t.Fatal("API_URL environment variable is not set")
@@ -60,16 +60,16 @@ func TestIntegrationFlow(t *testing.T) {
 		t.Fatalf("Failed to marshal book data: %v", err)
 	}
 
-	// Set base URL for the API
-	baseURL := apiURL + "/books"
-
 	// --- CreateBook scenario ---
-	req, err := http.NewRequest(http.MethodPost, baseURL, bytes.NewBuffer(payload))
+	req, err := http.NewRequest(http.MethodPost, apiURL+"/books", bytes.NewBuffer(payload))
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
 
-	req.Header.Set("Accept", "application/json")
+	// Set any necessary headers for the request
+	req.Header.Set("Content-Type", "application/json")
+
+	// Create an HTTP client and make the request
 	client := http.DefaultClient
 	resp, err := client.Do(req)
 	if err != nil {
@@ -90,13 +90,13 @@ func TestIntegrationFlow(t *testing.T) {
 	}
 
 	// Check the ID field for a valid UUID
-	bookID := responseBody["id"].(string)
-	if _, err := uuid.Parse(bookID); err != nil {
+	if _, err := uuid.Parse(responseBody["id"].(string)); err != nil {
 		t.Errorf("Invalid ID format. Expected a valid UUIDv4 but got %q", responseBody["id"])
 	}
 
 	// --- GetBook scenario ---
-	getBookURL := baseURL + "/" + bookID
+	getBookURL := fmt.Sprintf("%s/books/%s", apiURL, responseBody["id"])
+
 	req, err = http.NewRequest(http.MethodGet, getBookURL, nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
