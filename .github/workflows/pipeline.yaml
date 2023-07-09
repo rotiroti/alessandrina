@@ -241,14 +241,16 @@ jobs:
       - name: Make reports directory
         run: mkdir reports
 
-      - name: Get API URL
-        run: echo "API_URL=${{ needs.integration-tests.outputs.API_URL }}" >> $GITHUB_ENV
+      - name: Execute smoke test
+        run: API_URL=${{ needs.integration-tests.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/smoke.json --environment=smoke-test tests/performance/flow.yml
 
-      - name: Execute load tests
-        run: API_URL=${{ env.API_URL }} /home/node/artillery/bin/run run --output reports/create-book.json --environment=development tests/performance/create-book-load.yml
+      - name: Execute load test
+        run: API_URL=${{ needs.integration-tests.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/load.json --environment=load-test tests/performance/flow.yml
 
-      - name: Generate HTML report
-        run: /home/node/artillery/bin/run report --output reports/create-book.html reports/create-book.json
+      - name: Generate HTML reports
+        run: |
+          /home/node/artillery/bin/run report --output reports/smoke.html reports/smoke.json
+          /home/node/artillery/bin/run report --output reports/load.html reports/load.json
 
       - name: Archive test report
         uses: actions/upload-artifact@v3
