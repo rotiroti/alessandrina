@@ -25,15 +25,22 @@ config:
     skipHeader: true
     cast: false
   phases:
-    - name: "Ram up to 66 users in 5 minutes"
+    - name: "Warm up API for 1 minute"
+      duration: 60
+      arrivalRate: 5
+    - name: "Ramp up to peak load in 1 minute"
+      duration: 60
+      arrivalRate: 5
+      rampTo: 15
+    - name: "Sustain peak load for 3 minutes"
       duration: 180
-      arrivalRate: 66
-    - name: "Sustain 66 users for 10 minutes"
-      duration: 600
-      arrivalRate: 66
-    - name: "Ramp down to zero in 5 minutes"
-      duration: 180
-      arrivalRate: 0
+      arrivalRate: 15
+    - name: "Ramp down to zero in 1 minute"
+      duration: 60
+      arrivalRate: 15
+      rampTo: 0
+  plugins:
+    apedex: {}
 scenarios:
   - flow:
     - post:
