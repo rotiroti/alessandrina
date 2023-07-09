@@ -1,5 +1,8 @@
 # Alessandrina
 
+[![codecov](https://codecov.io/gh/rotiroti/alessandrina/branch/main/graph/badge.svg?token=eWAHfGU54Y)](https://codecov.io/gh/rotiroti/alessandrina)
+![CI/CD](https://github.com/rotiroti/alessandrina/actions/workflows/pipeline.yaml/badge.svg)
+
 This project aims to build a Go-based serverless application using AWS SAM. It provides an API with endpoints for interacting with a book database, allowing users to search, create, and delete books. The project also includes a robust CI/CD pipeline for automated build, test, and deployment on AWS using GitHub Actions.
 
 ## Requirements
@@ -89,16 +92,16 @@ The serverless application can be configured via some environment variables.
 
 ```shell
 # Use the in-memory database (sys/database/memory package)
-STORAGE_MEMORY: false
+STORAGE_MEMORY=false
 
 # Set the table name (required when using DynamoDB storage)
-TABLE_NAME: BooksTable-local
+TABLE_NAME=BooksTable-local
 
 # Set a custom endpoint to be used for a service (i.e. Localstack)
-AWS_ENDPOINT_DEBUG: "http://localstack_main:4566"
+AWS_ENDPOINT_DEBUG="http://localstack_main:4566"
 
 # Enable debug logging for AWS SDK Go clients to view HTTP requests and response bodies.
-AWS_CLIENT_DEBUG: false
+AWS_CLIENT_DEBUG=false
 ```
 
 ## Makefile Commands
