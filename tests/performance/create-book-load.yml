@@ -40,7 +40,8 @@ config:
       arrivalRate: 15
       rampTo: 0
   plugins:
-    apedex: {}
+    ensure: {}
+    expect: {}
 scenarios:
   - flow:
     - post:

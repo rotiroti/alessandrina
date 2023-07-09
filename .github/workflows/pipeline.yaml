@@ -235,6 +235,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Install additional dependencies
+        run: npm install -g artillery-plugin-expect artillery-plugin-ensure
+
       - name: Make reports directory
         run: mkdir reports
 
