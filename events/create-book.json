@@ -25,6 +25,6 @@
     "time": "12/Mar/2020:19:03:58 +0000",
     "timeEpoch": 1583348638390
   },
-  "body": "{\"title\":\"The Go Programming Language\",\"author\":\"Alan A. A. Donovan\",\"publisher\":\"Addison-Wesley Professional\",\"pages\":400,\"isbn\":\"978-0134190440\"}",
+  "body": "{\"title\":\"The Go Programming Language\",\"authors\":\"Alan A. A. Donovan\",\"publisher\":\"Addison-Wesley Professional\",\"pages\":400,\"isbn\":\"978-0134190440\"}",
   "isBase64Encoded": false
 }

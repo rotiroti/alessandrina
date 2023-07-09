@@ -9,6 +9,12 @@ build-CreateBookFunction:
 	mv create-book $(ARTIFACTS_DIR)
 	@echo "Built CreateBookFunction successfully"
 
+build-GetBookFunction:
+	@echo "Building GetBookFunction"
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o get-book github.com/rotiroti/alessandrina/functions/get-book/
+	mv get-book $(ARTIFACTS_DIR)
+	@echo "Built GetBookFunction successfully"
+
 format:
 	@echo "Format code"
 	go fmt ./...
