@@ -8,6 +8,11 @@ Globals:
     Runtime: go1.x
     Tracing: Active
     Architectures: [x86_64]
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref BooksTable
+        AWS_ENDPOINT_DEBUG: ""
+        AWS_CLIENT_DEBUG: false
     AutoPublishAlias: !Ref Environment
     DeploymentPreference:
       Type: Canary10Percent5Minutes
@@ -44,9 +49,6 @@ Resources:
       Environment:
         Variables:
           STORAGE_MEMORY: false
-          TABLE_NAME: !Ref BooksTable
-          AWS_ENDPOINT_DEBUG: ""
-          AWS_CLIENT_DEBUG: false
       Policies:
         - DynamoDBWritePolicy:
             TableName: !Ref BooksTable
@@ -58,6 +60,25 @@ Resources:
             Path: /books
             Method: POST
 
+  GetBookFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      CodeUri: .
+      Handler: get-book
+      Description: Retrieve a book
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref BooksTable
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref BooksAPI
+            Path: /books/{id}
+            Method: GET
+
 Outputs:
   WebEndpoint:
     Description: "API Gateway endpoint URL for the Books API"
@@ -66,3 +87,7 @@ Outputs:
   CreateBookFunction:
     Description: "CreateBook Lambda Function ARN"
     Value: !GetAtt CreateBookFunction.Arn
+
+  GetBookFunction:
+    Description: "GetBook Lambda Function ARN"
+    Value: !GetAtt GetBookFunction.Arn

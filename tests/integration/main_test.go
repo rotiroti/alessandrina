@@ -29,12 +29,13 @@ func generateRandomISBN() string {
 	return n.String()
 }
 
-func TestIntegrationCreateBook(t *testing.T) {
+func TestIntegrationFlow(t *testing.T) {
 	t.Parallel()
 
 	// Skip the integration test if the GO_RUN_INTEGRATION environment variable is not set
 	skipIntegration(t)
 
+	// Get the API URL from the environment
 	apiURL := os.Getenv("API_URL")
 	if apiURL == "" {
 		t.Fatal("API_URL environment variable is not set")
@@ -59,15 +60,16 @@ func TestIntegrationCreateBook(t *testing.T) {
 		t.Fatalf("Failed to marshal book data: %v", err)
 	}
 
-	req, err := http.NewRequest("POST", apiURL+"/books", bytes.NewBuffer(payload))
+	// Set base URL for the API
+	baseURL := apiURL + "/books"
+
+	// --- CreateBook scenario ---
+	req, err := http.NewRequest(http.MethodPost, baseURL, bytes.NewBuffer(payload))
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
 
-	// Set any necessary headers for the request
-	req.Header.Set("Content-Type", "application/json")
-
-	// Create an HTTP client and make the request
+	req.Header.Set("Accept", "application/json")
 	client := http.DefaultClient
 	resp, err := client.Do(req)
 	if err != nil {
@@ -75,7 +77,7 @@ func TestIntegrationCreateBook(t *testing.T) {
 	}
 	defer resp.Body.Close()
 
-	// Check the response status code
+	// Check the response status code to be 201
 	if resp.StatusCode != http.StatusCreated {
 		t.Errorf("Expected status code %d but got %d", http.StatusCreated, resp.StatusCode)
 	}
@@ -88,7 +90,27 @@ func TestIntegrationCreateBook(t *testing.T) {
 	}
 
 	// Check the ID field for a valid UUID
-	if _, err := uuid.Parse(responseBody["id"].(string)); err != nil {
+	bookID := responseBody["id"].(string)
+	if _, err := uuid.Parse(bookID); err != nil {
 		t.Errorf("Invalid ID format. Expected a valid UUIDv4 but got %q", responseBody["id"])
+	}
+
+	// --- GetBook scenario ---
+	getBookURL := baseURL + "/" + bookID
+	req, err = http.NewRequest(http.MethodGet, getBookURL, nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	req.Header.Set("Accept", "application/json")
+	resp, err = client.Do(req)
+	if err != nil {
+		t.Fatalf("Request failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Check the response status code to be 200
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Expected status code %d but got %d", http.StatusOK, resp.StatusCode)
 	}
 }

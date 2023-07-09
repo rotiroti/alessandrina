@@ -1,0 +1,65 @@
+config:
+  target: "{{ $processEnvironment.API_URL }}"
+  environments:
+    production:
+      target: "{{ $processEnvironment.API_URL }}"
+    development:
+      target: "{{ $processEnvironment.API_URL }}"
+    local:
+      target: "http://127.0.0.1:3000"
+  ensure:
+    thresholds:
+      # p99 of response time must be <250:
+      - "http.response_time.p99": 250
+      # p95 of response time must be <100:
+      - "http.response_time.p95": 100
+  payload:
+    path: "./books50.csv"
+    fields:
+      - "title"
+      - "authors"
+      - "isbn"
+      # - "pages"
+      - "publisher"
+    order: "sequential"
+    skipHeader: true
+    cast: false
+  phases:
+    - name: "Ramp up to peak load in 5 minutes"
+      duration: 300
+      rampTo: 15
+    - name: "Sustain peak load for 10 minutes"
+      duration: 600
+      arrivalRate: 15
+    - name: "Ramp down to zero in 5 minutes"
+      duration: 300
+      arrivalRate: 15
+      rampTo: 0
+  plugins:
+    ensure: {}
+    expect: {}
+scenarios:
+  - flow:
+    - post:
+        url: "/books"
+        headers:
+          Content-Type: "application/json"
+        json:
+          title: "{{ title }}"
+          authors: "{{ authors }}"
+          isbn: "{{ isbn }}"
+          # pages: "{{ pages }}"
+          publisher: "{{ publisher }}"
+        expect:
+          statusCode: 201
+          contentType: application/json
+          hasProperty: "id"
+        capture:
+          json: "$.id"
+          as: "id"
+    - get:
+        url: "/books/{{ id }}"
+        expect:
+          statusCode: 200
+          contentType: application/json
+          hasProperty: "id"
