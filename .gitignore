@@ -26,3 +26,6 @@ env*
 
 # VS Code project files
 .vscode/
+
+# Output of the Artillery.io tool.
+report.json*
