@@ -1,0 +1,12 @@
+{
+    "CreateBookFunction": {
+        "TABLE_NAME": "BooksTable-local",
+        "AWS_ENDPOINT_DEBUG": "http://localstack_main:4566",
+        "AWS_CLIENT_DEBUG": true
+    },
+    "GetBookFunction": {
+        "TABLE_NAME": "BooksTable-local",
+        "AWS_ENDPOINT_DEBUG": "http://localstack_main:4566",
+        "AWS_CLIENT_DEBUG": true
+    }
+}

@@ -23,7 +23,7 @@ const TITLE = [
   "Designing Data-Intensive Applications",
 ];
 
-const AUTHORs = [
+const AUTHORS = [
   "Brian W. Kernighan, Alan Donovan",
   "Martin Fowler",
   "Robert C. Martin",
@@ -83,13 +83,13 @@ const PUBLISHER = [
 
 const generateRandomData = (context, events, done) => {
     const title = TITLE[Math.floor(Math.random() * TITLE.length)];
-    const author = AUTHORs[Math.floor(Math.random() * AUTHORs.length)];
+    const authors = AUTHORS[Math.floor(Math.random() * AUTHORS.length)];
     const isbn = ISBN[Math.floor(Math.random() * ISBN.length)];
     const publisher = PUBLISHER[Math.floor(Math.random() * PUBLISHER.length)];
     const pages = Math.floor(Math.random() * 1000);
 
     context.vars.title = title;
-    context.vars.author = author;
+    context.vars.authors = authors;
     context.vars.isbn = isbn;
     context.vars.publisher = publisher;
     context.vars.pages = pages;
