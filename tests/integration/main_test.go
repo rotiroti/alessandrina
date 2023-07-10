@@ -78,7 +78,7 @@ func TestIntegrationFlow(t *testing.T) {
 	}
 
 	// Set any necessary headers for the request
-	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 
 	// Create an HTTP client and make the request
 	client := &http.Client{}
@@ -117,7 +117,6 @@ func TestIntegrationFlow(t *testing.T) {
 		t.Fatalf("Failed to create request: %v", err)
 	}
 
-	req.Header.Set("Accept", "application/json")
 	resp, err = client.Do(req)
 	if err != nil {
 		t.Fatalf("Request failed: %v", err)
