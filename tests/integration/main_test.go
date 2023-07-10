@@ -142,6 +142,6 @@ func TestIntegrationFlow(t *testing.T) {
 
 	// Check the response status code to be 204
 	if resp.StatusCode != http.StatusNoContent {
-		t.Errorf("Expected status code %d but got %d", http.StatusOK, resp.StatusCode)
+		t.Errorf("Expected status code %d but got %d", http.StatusNoContent, resp.StatusCode)
 	}
 }

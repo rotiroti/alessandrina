@@ -87,9 +87,6 @@ Resources:
       CodeUri: .
       Handler: delete-book
       Description: Delete a book
-      Policies:
-        - DynamoDBWritePolicy:
-            TableName: !Ref BooksTable
       Events:
         ApiEvent:
           Type: HttpApi
@@ -97,6 +94,12 @@ Resources:
             ApiId: !Ref BooksAPI
             Path: /books/{id}
             Method: DELETE
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: dynamodb:DeleteItem
+              Resource: !GetAtt BooksTable.Arn
 
 Outputs:
   WebEndpoint:
