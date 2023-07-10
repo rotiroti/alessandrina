@@ -22,6 +22,49 @@ func (_m *MockStorer) EXPECT() *MockStorer_Expecter {
 	return &MockStorer_Expecter{mock: &_m.Mock}
 }
 
+// Delete provides a mock function with given fields: ctx, bookID
+func (_m *MockStorer) Delete(ctx context.Context, bookID uuid.UUID) error {
+	ret := _m.Called(ctx, bookID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) error); ok {
+		r0 = rf(ctx, bookID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockStorer_Delete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Delete'
+type MockStorer_Delete_Call struct {
+	*mock.Call
+}
+
+// Delete is a helper method to define mock.On call
+//   - ctx context.Context
+//   - bookID uuid.UUID
+func (_e *MockStorer_Expecter) Delete(ctx interface{}, bookID interface{}) *MockStorer_Delete_Call {
+	return &MockStorer_Delete_Call{Call: _e.mock.On("Delete", ctx, bookID)}
+}
+
+func (_c *MockStorer_Delete_Call) Run(run func(ctx context.Context, bookID uuid.UUID)) *MockStorer_Delete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(uuid.UUID))
+	})
+	return _c
+}
+
+func (_c *MockStorer_Delete_Call) Return(_a0 error) *MockStorer_Delete_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockStorer_Delete_Call) RunAndReturn(run func(context.Context, uuid.UUID) error) *MockStorer_Delete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // FindOne provides a mock function with given fields: ctx, bookID
 func (_m *MockStorer) FindOne(ctx context.Context, bookID uuid.UUID) (Book, error) {
 	ret := _m.Called(ctx, bookID)

@@ -18,6 +18,7 @@ import (
 type DynamodbAPI interface {
 	PutItem(ctx context.Context, params *dynamodb.PutItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error)
 	GetItem(ctx context.Context, params *dynamodb.GetItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.GetItemOutput, error)
+	DeleteItem(ctx context.Context, params *dynamodb.DeleteItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.DeleteItemOutput, error)
 }
 
 // Store is a DynamoDB implementation of the Storer interface.
@@ -81,4 +82,21 @@ func (s *Store) FindOne(ctx context.Context, bookID uuid.UUID) (domain.Book, err
 	book := ToDomainBook(item)
 
 	return book, nil
+}
+
+// Delete removes a book from the DynamoDB database by using bookID as primary key.
+func (s *Store) Delete(ctx context.Context, bookID uuid.UUID) error {
+	_, err := s.api.DeleteItem(ctx, &dynamodb.DeleteItemInput{
+		TableName: aws.String(s.tableName),
+		Key: map[string]types.AttributeValue{
+			"id": &types.AttributeValueMemberS{Value: bookID.String()},
+		},
+		ConditionExpression: aws.String("attribute_exists(id)"),
+	})
+
+	if err != nil {
+		return fmt.Errorf("delete: %w", err)
+	}
+
+	return nil
 }

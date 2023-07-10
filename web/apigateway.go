@@ -54,6 +54,20 @@ func (h *APIGatewayV2Handler) GetBook(ctx context.Context, req events.APIGateway
 	return jsonResponse(http.StatusOK, ToAppBook(book)), nil
 }
 
+// DeleteBook handles requests for deleting a book by a given ID (UUID).
+func (h *APIGatewayV2Handler) DeleteBook(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
+	id, err := uuid.Parse(req.PathParameters["id"])
+	if err != nil {
+		return errorResponse(http.StatusBadRequest, err.Error()), nil
+	}
+
+	if err := h.service.Delete(ctx, id); err != nil {
+		return errorResponse(http.StatusInternalServerError, err.Error()), nil
+	}
+
+	return jsonResponse(http.StatusNoContent, nil), nil
+}
+
 func jsonResponse(code int, obj any) events.APIGatewayV2HTTPResponse {
 	body, err := json.Marshal(obj)
 	if err != nil {
