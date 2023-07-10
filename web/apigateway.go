@@ -27,13 +27,13 @@ func (h *APIGatewayV2Handler) CreateBook(ctx context.Context, req events.APIGate
 	var appNewBook AppNewBook
 
 	if err := json.Unmarshal([]byte(req.Body), &appNewBook); err != nil {
-		return errorResponse(http.StatusBadRequest, err.Error()), err
+		return errorResponse(http.StatusBadRequest, err.Error()), nil
 	}
 
 	domainNewBook := ToDomainNewBook(appNewBook)
 	book, err := h.service.Save(ctx, domainNewBook)
 	if err != nil {
-		return errorResponse(http.StatusInternalServerError, err.Error()), err
+		return errorResponse(http.StatusInternalServerError, err.Error()), nil
 	}
 
 	return jsonResponse(http.StatusCreated, ToAppBook(book)), nil
@@ -43,12 +43,12 @@ func (h *APIGatewayV2Handler) CreateBook(ctx context.Context, req events.APIGate
 func (h *APIGatewayV2Handler) GetBook(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
 	id, err := uuid.Parse(req.PathParameters["id"])
 	if err != nil {
-		return errorResponse(http.StatusBadRequest, err.Error()), err
+		return errorResponse(http.StatusBadRequest, err.Error()), nil
 	}
 
 	book, err := h.service.FindOne(ctx, id)
 	if err != nil {
-		return errorResponse(http.StatusInternalServerError, err.Error()), err
+		return errorResponse(http.StatusInternalServerError, err.Error()), nil
 	}
 
 	return jsonResponse(http.StatusOK, ToAppBook(book)), nil
