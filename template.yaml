@@ -79,6 +79,25 @@ Resources:
             Path: /books/{id}
             Method: GET
 
+  DeleteBookFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      CodeUri: .
+      Handler: delete-book
+      Description: Delete a book
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref BooksTable
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref BooksAPI
+            Path: /books/{id}
+            Method: DELETE
+
 Outputs:
   WebEndpoint:
     Description: "API Gateway endpoint URL for the Books API"
@@ -91,3 +110,7 @@ Outputs:
   GetBookFunction:
     Description: "GetBook Lambda Function ARN"
     Value: !GetAtt GetBookFunction.Arn
+
+  DeleteBookFunction:
+    Description: "DeleteBook Lambda Function ARN"
+    Value: !GetAtt DeleteBookFunction.Arn

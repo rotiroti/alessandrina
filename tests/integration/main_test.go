@@ -127,4 +127,21 @@ func TestIntegrationFlow(t *testing.T) {
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("Expected status code %d but got %d", http.StatusOK, resp.StatusCode)
 	}
+
+	// --- DeleteBook scenario ---
+	req, err = http.NewRequest(http.MethodDelete, bookURL, nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
+	resp, err = client.Do(req)
+	if err != nil {
+		t.Fatalf("Request failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Check the response status code to be 204
+	if resp.StatusCode != http.StatusNoContent {
+		t.Errorf("Expected status code %d but got %d", http.StatusOK, resp.StatusCode)
+	}
 }

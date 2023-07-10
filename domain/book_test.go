@@ -172,3 +172,59 @@ func TestFindOneFail(t *testing.T) {
 	// Assert that the mockStorer's expectations were met
 	mockStorer.AssertExpectations(t)
 }
+
+func TestDelete(t *testing.T) {
+	t.Parallel()
+
+	// Create a mock instance of the Storer interface
+	mockStorer := domain.NewMockStorer(t)
+
+	// Generate a fixed UUID for the test
+	expectedID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812")
+
+	// Create an instance of the Service struct with the mockStorer
+	service := domain.NewService(mockStorer)
+
+	// Set up the expected inputs and outputs
+	ctx := context.TODO()
+
+	// Set up the expectations for the mockStorer's Delete method
+	mockStorer.EXPECT().Delete(ctx, expectedID).Return(nil).Once()
+
+	// Call the Delete method of the service
+	err := service.Delete(ctx, expectedID)
+
+	// Assert the expected output
+	assert.NoError(t, err)
+
+	// Assert that the mockStorer's expectations were met
+	mockStorer.AssertExpectations(t)
+}
+
+func TestDeleteFail(t *testing.T) {
+	t.Parallel()
+
+	// Create a mock instance of the Storer interface
+	mockStorer := domain.NewMockStorer(t)
+
+	// Generate a fixed UUID for the test
+	bookID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812")
+
+	// Create an instance of the Service struct with the mockStorer
+	service := domain.NewService(mockStorer)
+
+	// Set up the expected inputs and outputs
+	ctx := context.TODO()
+
+	// Set up the expectations for the mockStorer's Delete method
+	mockStorer.EXPECT().Delete(ctx, bookID).Return(assert.AnError).Once()
+
+	// Call the Delete method of the service
+	err := service.Delete(ctx, bookID)
+
+	// Assert the expected output
+	assert.Error(t, err)
+
+	// Assert that the mockStorer's expectations were met
+	mockStorer.AssertExpectations(t)
+}

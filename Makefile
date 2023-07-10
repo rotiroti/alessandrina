@@ -15,6 +15,12 @@ build-GetBookFunction:
 	mv get-book $(ARTIFACTS_DIR)
 	@echo "Built GetBookFunction successfully"
 
+build-DeleteBookFunction:
+	@echo "Building DeleteBookFunction"
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o delete-book github.com/rotiroti/alessandrina/functions/delete-book/
+	mv delete-book $(ARTIFACTS_DIR)
+	@echo "Built DeleteBookFunction successfully"
+
 format:
 	@echo "Format code"
 	go fmt ./...

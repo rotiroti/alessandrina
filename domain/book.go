@@ -25,6 +25,7 @@ type UUIDGenerator func() uuid.UUID
 type Storer interface {
 	Save(ctx context.Context, book Book) error
 	FindOne(ctx context.Context, bookID uuid.UUID) (Book, error)
+	Delete(ctx context.Context, bookID uuid.UUID) error
 }
 
 // Service is the domain service for Book.
@@ -72,4 +73,13 @@ func (s *Service) FindOne(ctx context.Context, bookID uuid.UUID) (Book, error) {
 	}
 
 	return book, nil
+}
+
+// Delete removes a book from a storage by using bookID as primary key.
+func (s *Service) Delete(ctx context.Context, bookID uuid.UUID) error {
+	if err := s.storer.Delete(ctx, bookID); err != nil {
+		return fmt.Errorf("delete: bookID[%s]: %w", bookID, err)
+	}
+
+	return nil
 }

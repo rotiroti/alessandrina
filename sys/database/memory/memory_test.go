@@ -53,4 +53,20 @@ func TestMemoryStore(t *testing.T) {
 		_, err := store.FindOne(context.Background(), book.ID)
 		require.ErrorIs(t, err, domain.ErrNotFound)
 	})
+
+	t.Run("should delete an existing book", func(t *testing.T) {
+		t.Parallel()
+		store := memory.NewStore()
+		err := store.Save(context.Background(), book)
+		require.NoError(t, err)
+		err2 := store.Delete(context.Background(), book.ID)
+		require.NoError(t, err2)
+	})
+
+	t.Run("should throw error for deleting a non existing book", func(t *testing.T) {
+		t.Parallel()
+		store := memory.NewStore()
+		err := store.Delete(context.Background(), book.ID)
+		require.ErrorIs(t, err, domain.ErrNotFound)
+	})
 }
