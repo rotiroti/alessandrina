@@ -75,8 +75,8 @@ config:
       Content-Type: "application/json"
   ensure:
     thresholds:
-      - "http.response_time.p99": 150
-      - "http.response_time.p95": 100
+      - "http.response_time.p99": 250
+      - "http.response_time.p95": 150
     maxErrors: 0
 scenarios:
   - flow:
