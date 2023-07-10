@@ -121,7 +121,7 @@ jobs:
           use-installer: true
 
       - name: Build resources
-        run: sam build --template ${SAM_TEMPLATE}
+        run: sam build --template ${SAM_TEMPLATE} --cached --parallel
 
       - name: Assume the dev pipeline user role
         uses: aws-actions/configure-aws-credentials@v2

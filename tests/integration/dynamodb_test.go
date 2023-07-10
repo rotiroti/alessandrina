@@ -25,7 +25,6 @@ func setupLocalstack(t *testing.T) (tableName string, client *dynamodb.Client) {
 	t.Helper()
 
 	ctx := context.Background()
-
 	tableName, ok := os.LookupEnv("TABLE_NAME")
 	if !ok || tableName == "" {
 		t.Fatalf("TABLE_NAME environment variable not set")
@@ -66,11 +65,6 @@ func setupLocalstack(t *testing.T) (tableName string, client *dynamodb.Client) {
 }
 
 func TestDynamodbFlow(t *testing.T) {
-	// t.Parallel()
-
-	os.Setenv("LOCALSTACK", "true")
-	os.Setenv("TABLE_NAME", "BooksTable-local")
-
 	// Skip the DynamoDB test if the LOCALSTACK environment variable is not set
 	skipLocalstack(t)
 
@@ -79,8 +73,6 @@ func TestDynamodbFlow(t *testing.T) {
 	tableName, client := setupLocalstack(t)
 
 	t.Run("Save", func(t *testing.T) {
-		// t.Parallel()
-
 		// Create a new book
 		bookID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812")
 		book := domain.Book{
@@ -106,8 +98,6 @@ func TestDynamodbFlow(t *testing.T) {
 	})
 
 	t.Run("SaveTableNotExist", func(t *testing.T) {
-		// t.Parallel()
-
 		// Create a new store using the Localstack DynamoDB instance
 		store := ddb.NewStore("not-exist", client)
 
@@ -119,8 +109,6 @@ func TestDynamodbFlow(t *testing.T) {
 	})
 
 	t.Run("FindOne", func(t *testing.T) {
-		// t.Parallel()
-
 		// Create a new book
 		bookID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1cabd")
 		expectedBook := domain.Book{
@@ -152,8 +140,6 @@ func TestDynamodbFlow(t *testing.T) {
 	})
 
 	t.Run("FindOneBookNotFound", func(t *testing.T) {
-		// t.Parallel()
-
 		// Create a new book
 		bookID := uuid.MustParse("01234567-0123-0123-0123-0123456789ab")
 
@@ -168,8 +154,6 @@ func TestDynamodbFlow(t *testing.T) {
 	})
 
 	t.Run("Delete", func(t *testing.T) {
-		// t.Parallel()
-
 		// Create a new book
 		bookID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1cabd")
 		expectedBook := domain.Book{
@@ -198,8 +182,6 @@ func TestDynamodbFlow(t *testing.T) {
 	})
 
 	t.Run("DeleteBookNotFound", func(t *testing.T) {
-		// t.Parallel()
-
 		// Create a new book
 		bookID := uuid.MustParse("01234567-0123-0123-0123-0123456789ab")
 
