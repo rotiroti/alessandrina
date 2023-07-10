@@ -92,6 +92,8 @@ The serverless application can be configured via some environment variables.
 
 ```shell
 # Use the in-memory database (sys/database/memory package)
+#
+# NOTE: The variable will soon be deprecated and left only for unit testing.
 STORAGE_MEMORY=false
 
 # Set the table name (required when using DynamoDB storage)
@@ -167,11 +169,7 @@ sh ./scripts/create-table.sh BooksTable-local
 sam build --debug
 
 # 5. Start a local HTTP API server using the "BooksTable-local" DynamoDB table.
-TABLE_NAME=BooksTable-local AWS_ENDPOINT_DEBUG="http://localstack_main:4566" \
-    sam local start-api \
-        --docker-network alessandrina \
-        --warm-containers LAZY \
-        --debug
+sam local start-api --docker-network alessandrina --warm-containers LAZY --env-vars locals.json
 
 # 6. Open another shell and execute the command in the project's root directory.
 make integration-tests

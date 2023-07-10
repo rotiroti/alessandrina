@@ -15,7 +15,7 @@ Globals:
         AWS_CLIENT_DEBUG: false
     AutoPublishAlias: !Ref Environment
     DeploymentPreference:
-      Type: Canary10Percent5Minutes
+      Type: AllAtOnce
 
 Parameters:
   Environment:
