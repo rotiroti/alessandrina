@@ -14,6 +14,8 @@ import (
 	"github.com/google/uuid"
 )
 
+const baseURLPath = "/books"
+
 func skipIntegration(t *testing.T) {
 	t.Helper()
 	if os.Getenv("INTEGRATION") == "" {
@@ -30,21 +32,30 @@ func generateRandomISBN() string {
 	return n.String()
 }
 
-func TestIntegrationFlow(t *testing.T) {
-	t.Parallel()
-
-	// Skip the integration test if the GO_RUN_INTEGRATION environment variable is not set
-	skipIntegration(t)
-
-	apiURL := os.Getenv("API_URL")
-	if apiURL == "" {
-		t.Fatal("API_URL environment variable is not set")
+func setup() string {
+	u := os.Getenv("API_URL")
+	if u == "" {
+		panic("API_URL environment variable is not set")
 	}
 
 	// Remove the trailing slash from the URL if it exists
-	if apiURL[len(apiURL)-1] == '/' {
-		apiURL = apiURL[:len(apiURL)-1]
+	if u[len(u)-1] == '/' {
+		u = u[:len(u)-1]
 	}
+
+	baseURL := fmt.Sprintf("%s%s", u, baseURLPath)
+
+	return baseURL
+}
+
+func TestIntegrationFlow(t *testing.T) {
+	t.Parallel()
+
+	// Skip the integration test if the INTEGRATION environment variable is not set
+	skipIntegration(t)
+
+	// Setup test environment
+	baseURL := setup()
 
 	// Generate a random JSON payload for the book data
 	bookData := map[string]interface{}{
@@ -61,16 +72,16 @@ func TestIntegrationFlow(t *testing.T) {
 	}
 
 	// --- CreateBook scenario ---
-	req, err := http.NewRequest(http.MethodPost, apiURL+"/books", bytes.NewBuffer(payload))
+	req, err := http.NewRequest(http.MethodPost, baseURL, bytes.NewBuffer(payload))
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
 
 	// Set any necessary headers for the request
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
 
 	// Create an HTTP client and make the request
-	client := http.DefaultClient
+	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		t.Fatalf("Request failed: %v", err)
@@ -89,15 +100,19 @@ func TestIntegrationFlow(t *testing.T) {
 		t.Fatalf("Failed to decode response: %v", err)
 	}
 
+	bookID, ok := responseBody["id"].(string)
+	if !ok {
+		t.Fatalf("Failed to get book ID from response: %v", err)
+	}
+
 	// Check the ID field for a valid UUID
-	if _, err := uuid.Parse(responseBody["id"].(string)); err != nil {
-		t.Errorf("Invalid ID format. Expected a valid UUIDv4 but got %q", responseBody["id"])
+	if _, err := uuid.Parse(bookID); err != nil {
+		t.Errorf("Invalid ID format. Expected a valid UUIDv4 but got %q", bookID)
 	}
 
 	// --- GetBook scenario ---
-	getBookURL := fmt.Sprintf("%s/books/%s", apiURL, responseBody["id"])
-
-	req, err = http.NewRequest(http.MethodGet, getBookURL, nil)
+	bookURL := fmt.Sprintf("%s/%s", baseURL, bookID)
+	req, err = http.NewRequest(http.MethodGet, bookURL, nil)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}

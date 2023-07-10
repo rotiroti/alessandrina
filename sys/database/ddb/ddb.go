@@ -70,6 +70,10 @@ func (s *Store) FindOne(ctx context.Context, bookID uuid.UUID) (domain.Book, err
 		return domain.Book{}, fmt.Errorf("findbyid: getitem[%v]: %w", bookID, err)
 	}
 
+	if len(response.Item) == 0 {
+		return domain.Book{}, fmt.Errorf("findbyid: getitem[%v]: %w", bookID, domain.ErrNotFound)
+	}
+
 	if err = attributevalue.UnmarshalMap(response.Item, &item); err != nil {
 		return domain.Book{}, fmt.Errorf("findbyid: unmarshalmap: %w", err)
 	}

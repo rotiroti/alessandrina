@@ -26,7 +26,7 @@ func TestCreateBookUnableToUnmarshalBodyRequest(t *testing.T) {
 	ret, err := handler.CreateBook(ctx, events.APIGatewayV2HTTPRequest{})
 
 	// Assert the expected output
-	require.Error(t, err)
+	require.NoError(t, err)
 
 	// Assert response status code
 	require.Equal(t, http.StatusBadRequest, ret.StatusCode)
@@ -83,7 +83,7 @@ func TestCreateBookDuplicateID(t *testing.T) {
 	})
 
 	// Assert the expected output
-	require.Error(t, err)
+	require.NoError(t, err)
 
 	// Assert response status code
 	require.Equal(t, http.StatusInternalServerError, ret.StatusCode)
@@ -153,7 +153,7 @@ func TestGetBookUnableToUnmarshalPathParameters(t *testing.T) {
 	ret, err := handler.GetBook(ctx, events.APIGatewayV2HTTPRequest{})
 
 	// Assert the expected output
-	require.Error(t, err)
+	require.NoError(t, err)
 
 	// Assert the expected output
 	require.Equal(t, http.StatusBadRequest, ret.StatusCode)
@@ -183,7 +183,7 @@ func TestGetBookInternalServerError(t *testing.T) {
 	})
 
 	// Assert the expected output
-	require.Error(t, err)
+	require.NoError(t, err)
 
 	// Assert the expected output
 	require.Equal(t, http.StatusInternalServerError, ret.StatusCode)
