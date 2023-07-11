@@ -11,6 +11,8 @@ import (
 	"github.com/rotiroti/alessandrina/domain"
 	"github.com/rotiroti/alessandrina/sys/database/memory"
 	"github.com/rotiroti/alessandrina/web"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -388,4 +390,56 @@ func TestGetBooks(t *testing.T) {
 
 	// Assert response
 	require.Equal(t, http.StatusOK, ret.StatusCode)
+}
+
+type MockStorer struct {
+	mock.Mock
+}
+
+func (m *MockStorer) FindAll(ctx context.Context) ([]domain.Book, error) {
+	args := m.Called(ctx)
+	return args.Get(0).([]domain.Book), args.Error(1)
+}
+
+func (m *MockStorer) FindOne(ctx context.Context, bookID uuid.UUID) (domain.Book, error) {
+	args := m.Called(ctx, bookID)
+	return args.Get(0).(domain.Book), args.Error(1)
+}
+
+func (m *MockStorer) Save(ctx context.Context, book domain.Book) error {
+	args := m.Called(ctx, book)
+	return args.Error(0)
+}
+
+func (m *MockStorer) Delete(ctx context.Context, bookID uuid.UUID) error {
+	args := m.Called(ctx, bookID)
+	return args.Error(0)
+}
+
+func TestGetBooksFail(t *testing.T) {
+	t.Parallel()
+
+	// Instantiate context
+	ctx := context.Background()
+
+	// Instantiate a mock store
+	store := new(MockStorer)
+
+	// Set up the expected inputs and outputs
+	store.On("FindAll", ctx).Return([]domain.Book{}, assert.AnError).Once()
+
+	// Instantiate a new service
+	service := domain.NewService(store)
+
+	// Instantiate a new handler
+	handler := web.NewAPIGatewayV2Handler(service)
+
+	// Call the GetBooks method of the handler
+	ret, err := handler.GetBooks(ctx, events.APIGatewayV2HTTPRequest{})
+
+	// Assert the expected output
+	require.NoError(t, err)
+
+	// Assert response
+	require.Equal(t, http.StatusInternalServerError, ret.StatusCode)
 }
