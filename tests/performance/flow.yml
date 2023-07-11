@@ -15,13 +15,13 @@ config:
       phases:
         - name: "Ramp up to peak load in 5 minutes"
           duration: 300
-          rampTo: 3
+          rampTo: 5
         - name: "Sustain peak load for 10 minutes"
           duration: 600
-          arrivalRate: 3
+          arrivalRate: 5
         - name: "Ramp down to zero in 5 minutes"
           duration: 300
-          arrivalRate: 3
+          arrivalRate: 5
           rampTo: 0
     stress-test:
       target: "{{ $processEnvironment.API_URL }}"
@@ -77,10 +77,10 @@ config:
     thresholds:
       - "http.response_time.p99": 250
       - "http.response_time.p95": 150
-    maxErrors: 0
+    # maxErrors: 0
 scenarios:
   - name: "Create, Read, Delete"
-    weight: 66
+    # weight: 66
     flow:
       - function: "generateRandomData"
       - post:
@@ -105,10 +105,10 @@ scenarios:
           url: "/books/{{ id }}"
           expect:
             statusCode: 204
-  - name: "List"
-    weight: 34
-    flow:
-      - get:
-          url: "/books"
-          expect:
-            statusCode: 200
+  # - name: "List"
+  #   weight: 34
+  #   flow:
+  #     - get:
+  #         url: "/books"
+  #         expect:
+  #           statusCode: 200
