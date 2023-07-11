@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/google/uuid"
 	"github.com/rotiroti/alessandrina/domain"
 	"github.com/rotiroti/alessandrina/sys/database/ddb"
@@ -193,5 +194,37 @@ func TestDynamodbFlow(t *testing.T) {
 
 		// Assert the expected output
 		require.Error(t, err)
+	})
+
+	t.Run("FindAllBooks", func(t *testing.T) {
+		// Create a new store using the Localstack DynamoDB instance
+		store := ddb.NewStore(tableName, client)
+
+		// Seed the database with some books
+		newBooksLen := 3
+		newBooks := make([]domain.Book, newBooksLen)
+
+		for i := 0; i < newBooksLen; i++ {
+			book := domain.Book{
+				ID:        uuid.New(),
+				Title:     gofakeit.BookTitle(),
+				Authors:   gofakeit.BookAuthor(),
+				Publisher: gofakeit.Company(),
+				Pages:     gofakeit.Number(100, 1200),
+			}
+
+			// Save a new book in the database
+			err := store.Save(ctx, book)
+			require.NoError(t, err)
+
+			newBooks[i] = book
+		}
+
+		// Call the FindAll method of the store
+		books, err := store.FindAll(ctx)
+
+		// Assert the expected output
+		require.NoError(t, err)
+		require.LessOrEqual(t, newBooksLen, len(books))
 	})
 }

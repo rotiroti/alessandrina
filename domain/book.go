@@ -24,6 +24,7 @@ type UUIDGenerator func() uuid.UUID
 //go:generate mockery --name Storer
 type Storer interface {
 	Save(ctx context.Context, book Book) error
+	FindAll(ctx context.Context) ([]Book, error)
 	FindOne(ctx context.Context, bookID uuid.UUID) (Book, error)
 	Delete(ctx context.Context, bookID uuid.UUID) error
 }
@@ -63,6 +64,16 @@ func (s *Service) Save(ctx context.Context, nb NewBook) (Book, error) {
 	}
 
 	return book, nil
+}
+
+// FindAll returns all books from a storage.
+func (s *Service) FindAll(ctx context.Context) ([]Book, error) {
+	books, err := s.storer.FindAll(ctx)
+	if err != nil {
+		return []Book{}, fmt.Errorf("findall: %w", err)
+	}
+
+	return books, nil
 }
 
 // FindOne returns a book from a storage by using bookID as primary key.

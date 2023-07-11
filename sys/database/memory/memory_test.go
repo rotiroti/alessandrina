@@ -69,4 +69,25 @@ func TestMemoryStore(t *testing.T) {
 		err := store.Delete(context.Background(), book.ID)
 		require.ErrorIs(t, err, domain.ErrNotFound)
 	})
+
+	t.Run("should return all books", func(t *testing.T) {
+		t.Parallel()
+		store := memory.NewStore()
+
+		for i := 0; i < 10; i++ {
+			book := domain.Book{
+				ID:        uuid.New(),
+				Title:     "The Go Programming Language",
+				Authors:   "Alan A. A. Donovan, Brian W. Kernighan",
+				Publisher: "Addison-Wesley Professional",
+				Pages:     400,
+			}
+			err := store.Save(context.Background(), book)
+			require.NoError(t, err)
+		}
+
+		ret, err2 := store.FindAll(context.Background())
+		require.NoError(t, err2)
+		require.Len(t, ret, 10)
+	})
 }

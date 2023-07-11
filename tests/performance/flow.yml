@@ -79,7 +79,9 @@ config:
       - "http.response_time.p95": 150
     maxErrors: 0
 scenarios:
-  - flow:
+  - name: "Create, Read, Delete"
+    weight: 66
+    flow:
       - function: "generateRandomData"
       - post:
           url: "/books"
@@ -103,3 +105,10 @@ scenarios:
           url: "/books/{{ id }}"
           expect:
             statusCode: 204
+  - name: "List"
+    weight: 34
+    flow:
+      - get:
+          url: "/books"
+          expect:
+            statusCode: 200

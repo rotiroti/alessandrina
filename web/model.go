@@ -43,3 +43,20 @@ func ToDomainNewBook(book AppNewBook) domain.NewBook {
 		ISBN:      book.ISBN,
 	}
 }
+
+// AppListBooks is the list of books model used by the API.
+type AppListBooks struct {
+	Books []AppBook `json:"books"`
+}
+
+// ToAppListBooks converts a []domain.Book to an AppListBooks.
+func ToAppListBooks(books []domain.Book) AppListBooks {
+	appBooks := make([]AppBook, len(books))
+	for i, book := range books {
+		appBooks[i] = ToAppBook(book)
+	}
+
+	return AppListBooks{
+		Books: appBooks,
+	}
+}

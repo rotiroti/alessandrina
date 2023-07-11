@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/google/uuid"
 	"github.com/rotiroti/alessandrina/domain"
 	"github.com/rotiroti/alessandrina/sys/database/memory"
@@ -346,4 +347,45 @@ func TestDelete(t *testing.T) {
 
 	// Assert the expected output
 	require.Equal(t, http.StatusNoContent, ret.StatusCode)
+}
+
+func TestGetBooks(t *testing.T) {
+	t.Parallel()
+
+	// Instantiate context
+	ctx := context.Background()
+
+	// Instantiate a memory store
+	store := memory.NewStore()
+
+	// Seed the store with some books
+	const expectedBookCount = 5
+
+	for i := 0; i < expectedBookCount; i++ {
+		book := domain.Book{
+			ID:        uuid.New(),
+			Title:     gofakeit.BookTitle(),
+			Authors:   gofakeit.BookAuthor(),
+			Publisher: gofakeit.Company(),
+			Pages:     gofakeit.Number(100, 1200),
+		}
+
+		err := store.Save(ctx, book)
+		require.NoError(t, err)
+	}
+
+	// Create an instance of the Service struct with the populated store and mockGenerator
+	service := domain.NewService(store)
+
+	// Instantiate a new handler
+	handler := web.NewAPIGatewayV2Handler(service)
+
+	// Call the GetBooks method of the handler
+	ret, err := handler.GetBooks(ctx, events.APIGatewayV2HTTPRequest{})
+
+	// Assert the expected output
+	require.NoError(t, err)
+
+	// Assert response
+	require.Equal(t, http.StatusOK, ret.StatusCode)
 }
