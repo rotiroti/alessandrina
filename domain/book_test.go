@@ -228,3 +228,74 @@ func TestDeleteFail(t *testing.T) {
 	// Assert that the mockStorer's expectations were met
 	mockStorer.AssertExpectations(t)
 }
+
+func TestFindAll(t *testing.T) {
+	t.Parallel()
+
+	// Create a mock instance of the Storer interface
+	mockStorer := domain.NewMockStorer(t)
+
+	// Set up the expected inputs and outputs
+	ctx := context.TODO()
+	expectedBooks := []domain.Book{
+		{
+			ID:        uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812"),
+			Title:     "Test Book",
+			Authors:   "Test Authors",
+			Publisher: "Test Publisher",
+			ISBN:      "Test ISBN",
+			Pages:     100,
+		},
+		{
+			ID:        uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c813"),
+			Title:     "Test Book 2",
+			Authors:   "Test Authors 2",
+			Publisher: "Test Publisher 2",
+			ISBN:      "Test ISBN 2",
+			Pages:     200,
+		},
+	}
+
+	// // Set up the expectations for the mockStorer's FindAll method
+	mockStorer.EXPECT().FindAll(ctx).Return(expectedBooks, nil).Once()
+
+	// Create an instance of the Service struct with the mockStorer
+	service := domain.NewService(mockStorer)
+
+	// Call the FindAll method of the service
+	foundBooks, err := service.FindAll(ctx)
+
+	// Assert the expected output
+	assert.NoError(t, err)
+	assert.Equal(t, expectedBooks, foundBooks)
+
+	// Assert that the mockStorer's expectations were met
+	mockStorer.AssertExpectations(t)
+}
+
+func TestFindAllFail(t *testing.T) {
+	t.Parallel()
+
+	// Create a mock instance of the Storer interface
+	mockStorer := domain.NewMockStorer(t)
+
+	// Set up the expected inputs and outputs
+	ctx := context.TODO()
+	expectedBooks := []domain.Book{}
+
+	// // Set up the expectations for the mockStorer's FindAll method
+	mockStorer.EXPECT().FindAll(ctx).Return(expectedBooks, assert.AnError).Once()
+
+	// Create an instance of the Service struct with the mockStorer
+	service := domain.NewService(mockStorer)
+
+	// Call the FindAll method of the service
+	foundBooks, err := service.FindAll(ctx)
+
+	// Assert the expected output
+	assert.Error(t, err)
+	assert.Equal(t, expectedBooks, foundBooks)
+
+	// Assert that the mockStorer's expectations were met
+	mockStorer.AssertExpectations(t)
+}

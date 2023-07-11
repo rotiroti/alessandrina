@@ -1,17 +1,22 @@
 {
-    "CreateBookFunction": {
-        "TABLE_NAME": "BooksTable-local",
-        "AWS_ENDPOINT_DEBUG": "http://localstack_main:4566",
-        "AWS_CLIENT_DEBUG": true
-    },
-    "GetBookFunction": {
-        "TABLE_NAME": "BooksTable-local",
-        "AWS_ENDPOINT_DEBUG": "http://localstack_main:4566",
-        "AWS_CLIENT_DEBUG": true
-    },
-    "DeleteBookFunction": {
-        "TABLE_NAME": "BooksTable-local",
-        "AWS_ENDPOINT_DEBUG": "http://localstack_main:4566",
-        "AWS_CLIENT_DEBUG": true
-    }
+  "GetBooksFunction": {
+    "TABLE_NAME": "BooksTable-local",
+    "AWS_ENDPOINT_DEBUG": "http://localstack_main:4566",
+    "AWS_CLIENT_DEBUG": true
+  },
+  "GetBookFunction": {
+    "TABLE_NAME": "BooksTable-local",
+    "AWS_ENDPOINT_DEBUG": "http://localstack_main:4566",
+    "AWS_CLIENT_DEBUG": true
+  },
+  "CreateBookFunction": {
+    "TABLE_NAME": "BooksTable-local",
+    "AWS_ENDPOINT_DEBUG": "http://localstack_main:4566",
+    "AWS_CLIENT_DEBUG": true
+  },
+  "DeleteBookFunction": {
+    "TABLE_NAME": "BooksTable-local",
+    "AWS_ENDPOINT_DEBUG": "http://localstack_main:4566",
+    "AWS_CLIENT_DEBUG": true
+  }
 }

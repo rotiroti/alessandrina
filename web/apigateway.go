@@ -39,6 +39,16 @@ func (h *APIGatewayV2Handler) CreateBook(ctx context.Context, req events.APIGate
 	return jsonResponse(http.StatusCreated, ToAppBook(book)), nil
 }
 
+// GetBooks handles requests for getting all books.
+func (h *APIGatewayV2Handler) GetBooks(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
+	books, err := h.service.FindAll(ctx)
+	if err != nil {
+		return errorResponse(http.StatusInternalServerError, err.Error()), nil
+	}
+
+	return jsonResponse(http.StatusOK, ToAppListBooks(books)), nil
+}
+
 // GetBook handles requests for getting a book by a given ID (UUID).
 func (h *APIGatewayV2Handler) GetBook(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
 	id, err := uuid.Parse(req.PathParameters["id"])

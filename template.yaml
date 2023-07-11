@@ -38,6 +38,44 @@ Resources:
         ReadCapacityUnits: 10
         WriteCapacityUnits: 10
 
+  GetBooksFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      CodeUri: .
+      Handler: get-books
+      Description: Retrieve all books
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref BooksTable
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref BooksAPI
+            Path: /books
+            Method: GET
+
+  GetBookFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      CodeUri: .
+      Handler: get-book
+      Description: Retrieve a book
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref BooksTable
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref BooksAPI
+            Path: /books/{id}
+            Method: GET
+
   CreateBookFunction:
     Type: AWS::Serverless::Function
     Metadata:
@@ -59,25 +97,6 @@ Resources:
             ApiId: !Ref BooksAPI
             Path: /books
             Method: POST
-
-  GetBookFunction:
-    Type: AWS::Serverless::Function
-    Metadata:
-      BuildMethod: makefile
-    Properties:
-      CodeUri: .
-      Handler: get-book
-      Description: Retrieve a book
-      Policies:
-        - DynamoDBReadPolicy:
-            TableName: !Ref BooksTable
-      Events:
-        ApiEvent:
-          Type: HttpApi
-          Properties:
-            ApiId: !Ref BooksAPI
-            Path: /books/{id}
-            Method: GET
 
   DeleteBookFunction:
     Type: AWS::Serverless::Function
@@ -106,13 +125,17 @@ Outputs:
     Description: "API Gateway endpoint URL for the Books API"
     Value: !Sub "https://${BooksAPI}.execute-api.${AWS::Region}.amazonaws.com/"
 
-  CreateBookFunction:
-    Description: "CreateBook Lambda Function ARN"
-    Value: !GetAtt CreateBookFunction.Arn
+  GetBooksFunction:
+    Description: "GetBooks Lambda Function ARN"
+    Value: !GetAtt GetBooksFunction.Arn
 
   GetBookFunction:
     Description: "GetBook Lambda Function ARN"
     Value: !GetAtt GetBookFunction.Arn
+
+  CreateBookFunction:
+    Description: "CreateBook Lambda Function ARN"
+    Value: !GetAtt CreateBookFunction.Arn
 
   DeleteBookFunction:
     Description: "DeleteBook Lambda Function ARN"

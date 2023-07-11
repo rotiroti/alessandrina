@@ -299,3 +299,65 @@ func TestDynamoDBStore_DeleteFail(t *testing.T) {
 	// Assert that the mockDynamoDB's expectations were met
 	mockDynamoDB.AssertExpectations(t)
 }
+
+func TestDynamoDBStore_FindAll(t *testing.T) {
+	t.Parallel()
+
+	tableName := "test-table"
+
+	// Create a mock instance of the DynamoDB interface
+	mockDynamoDB := ddb.NewMockDynamodbAPI(t)
+
+	// Create a new store using the mock DynamoDB instance
+	store := ddb.NewStore(tableName, mockDynamoDB)
+
+	// Set up the expected inputs and outputs
+	ctx := context.Background()
+	expectedScanInput := dynamodb.ScanInput{
+		TableName: aws.String(tableName),
+		Limit:     aws.Int32(ddb.DefaultTableScanLimit),
+	}
+
+	// Expect a call to Scan with the expected input and return the mock output
+	mockDynamoDB.EXPECT().Scan(ctx, &expectedScanInput).Return(&dynamodb.ScanOutput{}, nil).Once()
+
+	// Call the FindAll method of the store
+	_, err := store.FindAll(ctx)
+
+	// Assert the expected output
+	require.NoError(t, err)
+
+	// Assert that the mockDynamoDB's expectations were met
+	mockDynamoDB.AssertExpectations(t)
+}
+
+func TestDynamoDBStore_FindAllFail(t *testing.T) {
+	t.Parallel()
+
+	tableName := "test-table"
+
+	// Create a mock instance of the DynamoDB interface
+	mockDynamoDB := ddb.NewMockDynamodbAPI(t)
+
+	// Create a new store using the mock DynamoDB instance
+	store := ddb.NewStore(tableName, mockDynamoDB)
+
+	// Set up the expected inputs and outputs
+	ctx := context.Background()
+	expectedScanInput := dynamodb.ScanInput{
+		TableName: aws.String(tableName),
+		Limit:     aws.Int32(ddb.DefaultTableScanLimit),
+	}
+
+	// Expect a call to Scan with the expected input and return the mock output
+	mockDynamoDB.EXPECT().Scan(ctx, &expectedScanInput).Return(&dynamodb.ScanOutput{}, assert.AnError).Once()
+
+	// Call the FindAll method of the store
+	_, err := store.FindAll(ctx)
+
+	// Assert the expected output
+	require.Error(t, err)
+
+	// Assert that the mockDynamoDB's expectations were met
+	mockDynamoDB.AssertExpectations(t)
+}

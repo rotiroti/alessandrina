@@ -12,10 +12,16 @@ import (
 	"github.com/rotiroti/alessandrina/domain"
 )
 
+// DefaultTableScanLimit is the default limit for the Scan operation.
+//
+// NOTE: This is a temporary solution to avoid scanning the entire table.
+const DefaultTableScanLimit = 25
+
 // DynamodbAPI is the interface used to interact with AWS DynamoDB.
 //
 //go:generate mockery --name DynamoDB
 type DynamodbAPI interface {
+	Scan(ctx context.Context, params *dynamodb.ScanInput, optFns ...func(*dynamodb.Options)) (*dynamodb.ScanOutput, error)
 	PutItem(ctx context.Context, params *dynamodb.PutItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error)
 	GetItem(ctx context.Context, params *dynamodb.GetItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.GetItemOutput, error)
 	DeleteItem(ctx context.Context, params *dynamodb.DeleteItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.DeleteItemOutput, error)
@@ -55,6 +61,28 @@ func (s *Store) Save(ctx context.Context, book domain.Book) error {
 	}
 
 	return nil
+}
+
+// FindAll returns all books from the DynamoDB database.
+func (s *Store) FindAll(ctx context.Context) ([]domain.Book, error) {
+	response, err := s.api.Scan(ctx, &dynamodb.ScanInput{
+		TableName: aws.String(s.tableName),
+		Limit:     aws.Int32(DefaultTableScanLimit),
+	})
+
+	if err != nil {
+		return []domain.Book{}, fmt.Errorf("findall: scan: %w", err)
+	}
+
+	items := make([]DynamodbBook, 0, len(response.Items))
+
+	if err = attributevalue.UnmarshalListOfMaps(response.Items, &items); err != nil {
+		return []domain.Book{}, fmt.Errorf("findall: unmarshallistofmaps: %w", err)
+	}
+
+	books := ToDomainBooks(items)
+
+	return books, nil
 }
 
 // FindOne returns a book from the DynamoDB database by using bookID as primary key.

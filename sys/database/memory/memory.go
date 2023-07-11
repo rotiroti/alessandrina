@@ -38,6 +38,19 @@ func (s *Store) Save(_ context.Context, book domain.Book) error {
 	return nil
 }
 
+// FindAll returns all books from the in-memory database.
+func (s *Store) FindAll(_ context.Context) ([]domain.Book, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	books := make([]domain.Book, 0, len(s.container))
+	for _, book := range s.container {
+		books = append(books, book)
+	}
+
+	return books, nil
+}
+
 // FindOne returns a book from the in-memory database.
 func (s *Store) FindOne(_ context.Context, bookID uuid.UUID) (domain.Book, error) {
 	s.mu.RLock()

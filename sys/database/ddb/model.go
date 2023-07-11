@@ -47,3 +47,14 @@ func ToDomainBook(book DynamodbBook) domain.Book {
 		ISBN:      book.ISBN,
 	}
 }
+
+// ToDomainBooks converts a slice of DynamoDBBook to a slice of domain.Book.
+func ToDomainBooks(books []DynamodbBook) []domain.Book {
+	domainBooks := make([]domain.Book, len(books))
+
+	for i, book := range books {
+		domainBooks[i] = ToDomainBook(book)
+	}
+
+	return domainBooks
+}

@@ -3,17 +3,23 @@ CUR_DIR = $(shell echo "${PWD}")
 
 .PHONY: unit-tests integration-tests coverage format clean mocks remove-mocks lint
 
-build-CreateBookFunction:
-	@echo "Building CreateBookFunction"
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o create-book github.com/rotiroti/alessandrina/functions/create-book/
-	mv create-book $(ARTIFACTS_DIR)
-	@echo "Built CreateBookFunction successfully"
+build-GetBooksFunction:
+	@echo "Building GetBooksFunction"
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o get-books github.com/rotiroti/alessandrina/functions/get-books/
+	mv get-books $(ARTIFACTS_DIR)
+	@echo "Built GetBooksFunction successfully"
 
 build-GetBookFunction:
 	@echo "Building GetBookFunction"
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o get-book github.com/rotiroti/alessandrina/functions/get-book/
 	mv get-book $(ARTIFACTS_DIR)
 	@echo "Built GetBookFunction successfully"
+
+build-CreateBookFunction:
+	@echo "Building CreateBookFunction"
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o create-book github.com/rotiroti/alessandrina/functions/create-book/
+	mv create-book $(ARTIFACTS_DIR)
+	@echo "Built CreateBookFunction successfully"
 
 build-DeleteBookFunction:
 	@echo "Building DeleteBookFunction"
