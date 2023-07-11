@@ -318,14 +318,29 @@ func TestDynamoDBStore_FindAll(t *testing.T) {
 		Limit:     aws.Int32(ddb.DefaultTableScanLimit),
 	}
 
+	expectedScanOutput := &dynamodb.ScanOutput{
+		Items: []map[string]types.AttributeValue{
+			{
+				"id": &types.AttributeValueMemberS{Value: "ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812"},
+			},
+		},
+	}
+
+	expectedBooks := []domain.Book{
+		{
+			ID: uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812"),
+		},
+	}
+
 	// Expect a call to Scan with the expected input and return the mock output
-	mockDynamoDB.EXPECT().Scan(ctx, &expectedScanInput).Return(&dynamodb.ScanOutput{}, nil).Once()
+	mockDynamoDB.EXPECT().Scan(ctx, &expectedScanInput).Return(expectedScanOutput, nil).Once()
 
 	// Call the FindAll method of the store
-	_, err := store.FindAll(ctx)
+	books, err := store.FindAll(ctx)
 
 	// Assert the expected output
 	require.NoError(t, err)
+	require.Equal(t, expectedBooks, books)
 
 	// Assert that the mockDynamoDB's expectations were met
 	mockDynamoDB.AssertExpectations(t)
