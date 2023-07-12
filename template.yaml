@@ -4,7 +4,6 @@ Description: SAM Template for Alessandrina serverless application.
 Globals:
   Function:
     Timeout: 10
-    MemorySize: 512
     Runtime: go1.x
     Tracing: Active
     Architectures: [x86_64]
@@ -43,12 +42,10 @@ Resources:
     Metadata:
       BuildMethod: makefile
     Properties:
+      MemorySize: 128
       CodeUri: .
       Handler: get-books
       Description: Retrieve all books
-      Policies:
-        - DynamoDBReadPolicy:
-            TableName: !Ref BooksTable
       Events:
         ApiEvent:
           Type: HttpApi
@@ -56,18 +53,22 @@ Resources:
             ApiId: !Ref BooksAPI
             Path: /books
             Method: GET
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: dynamodb:Scan
+              Resource: !GetAtt BooksTable.Arn
 
   GetBookFunction:
     Type: AWS::Serverless::Function
     Metadata:
       BuildMethod: makefile
     Properties:
+      MemorySize: 256
       CodeUri: .
       Handler: get-book
       Description: Retrieve a book
-      Policies:
-        - DynamoDBReadPolicy:
-            TableName: !Ref BooksTable
       Events:
         ApiEvent:
           Type: HttpApi
@@ -75,21 +76,25 @@ Resources:
             ApiId: !Ref BooksAPI
             Path: /books/{id}
             Method: GET
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: dynamodb:GetItem
+              Resource: !GetAtt BooksTable.Arn
 
   CreateBookFunction:
     Type: AWS::Serverless::Function
     Metadata:
       BuildMethod: makefile
     Properties:
+      MemorySize: 128
       CodeUri: .
       Handler: create-book
       Description: Create a new book
       Environment:
         Variables:
           STORAGE_MEMORY: false
-      Policies:
-        - DynamoDBWritePolicy:
-            TableName: !Ref BooksTable
       Events:
         ApiEvent:
           Type: HttpApi
@@ -97,12 +102,19 @@ Resources:
             ApiId: !Ref BooksAPI
             Path: /books
             Method: POST
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: dynamodb:PutItem
+              Resource: !GetAtt BooksTable.Arn
 
   DeleteBookFunction:
     Type: AWS::Serverless::Function
     Metadata:
       BuildMethod: makefile
     Properties:
+      MemorySize: 128
       CodeUri: .
       Handler: delete-book
       Description: Delete a book
