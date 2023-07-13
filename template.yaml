@@ -11,16 +11,9 @@ Globals:
         TABLE_NAME: !Ref BooksTable
         AWS_ENDPOINT_DEBUG: ""
         AWS_CLIENT_DEBUG: false
-    AutoPublishAlias: !Ref Environment
+    AutoPublishAlias: live
     DeploymentPreference:
-      Type: AllAtOnce
-
-Parameters:
-  Environment:
-    Type: String
-    Default: dev
-    AllowedValues: [dev, prod]
-    Description: Environment of this stack of resources
+      Type: Linear10PercentEvery1Minute
 
 Resources:
   BooksAPI:
