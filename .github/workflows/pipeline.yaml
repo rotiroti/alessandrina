@@ -227,45 +227,42 @@ jobs:
         run: |
           echo "API_URL=${{ needs.deploy-dev.outputs.API_URL }}" >> $GITHUB_OUTPUT
 
-  # load-tests:
-  #   if: github.ref == 'refs/heads/main'
-  #   needs: [integration-tests]
-  #   runs-on: ubuntu-latest
-  #   container: artilleryio/artillery:latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-
-  #     - name: Install additional dependencies
-  #       run: npm install -g artillery-plugin-expect artillery-plugin-ensure
-
-  #     - name: Make reports directory
-  #       run: mkdir reports
-
-  #     - name: Execute smoke test
-  #       run: API_URL=${{ needs.integration-tests.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/smoke.json --environment=smoke-test tests/performance/flow.yml
-
-  #     - name: Execute load test
-  #       run: API_URL=${{ needs.integration-tests.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/load.json --environment=load-test tests/performance/flow.yml
-
-  #     - name: Generate HTML reports
-  #       run: |
-  #         /home/node/artillery/bin/run report --output reports/smoke.html reports/smoke.json
-  #         /home/node/artillery/bin/run report --output reports/load.html reports/load.json
-
-  #     - name: Archive test report
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: artillery-test-report
-  #         path: reports/*
-
-  deploy-prod:
+  load-tests:
     if: github.ref == 'refs/heads/main'
     needs: [integration-tests]
     runs-on: ubuntu-latest
-    # Configure GitHub Action Environment to have a manual approval step before deployment to production
-    # https://docs.github.com/en/actions/reference/environments
-    # environment: <configured-environment>
+    container: artilleryio/artillery:latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install additional dependencies
+        run: npm install -g artillery-plugin-expect artillery-plugin-ensure
+
+      - name: Make reports directory
+        run: mkdir reports
+
+      - name: Execute smoke test
+        run: API_URL=${{ needs.integration-tests.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/smoke.json --environment=smoke-test tests/performance/flow.yml
+
+      # - name: Execute load test
+      #   run: API_URL=${{ needs.integration-tests.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/load.json --environment=load-test tests/performance/flow.yml
+
+      - name: Generate HTML reports
+        run: |
+          /home/node/artillery/bin/run report --output reports/smoke.html reports/smoke.json
+          # /home/node/artillery/bin/run report --output reports/load.html reports/load.json
+
+      - name: Archive test report
+        uses: actions/upload-artifact@v3
+        with:
+          name: artillery-test-report
+          path: reports/*
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/main'
+    needs: [load-tests]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: aws-actions/setup-sam@v2
