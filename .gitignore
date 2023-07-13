@@ -29,3 +29,6 @@ env*
 
 # Output of the Artillery.io tool.
 report.json*
+
+# Mac OS X Finder
+.DS_Store

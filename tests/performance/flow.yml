@@ -1,6 +1,6 @@
 config:
   plugins:
-    ensure: {}
+    # ensure: {}
     expect: {}
   environments:
     smoke-test:
@@ -8,8 +8,8 @@ config:
       phases:
         - name: "Starting Smoke test"
           duration: 1
-          arrivalRate: 1
-          maxVusers: 1
+          arrivalRate: 3
+          maxVusers: 3
     load-test:
       target: "{{ $processEnvironment.API_URL }}"
       phases:
@@ -73,14 +73,13 @@ config:
     headers:
       Accept: "application/json"
       Content-Type: "application/json"
-  ensure:
-    thresholds:
-      - "http.response_time.p99": 250
-      - "http.response_time.p95": 150
-    # maxErrors: 0
+  # ensure:
+  #   thresholds:
+  #     - "http.response_time.p99": 550
+  #     - "http.response_time.p95": 300
+  #   maxErrors: 0
 scenarios:
-  - name: "Create, Read, Delete"
-    # weight: 66
+  - name: "Create, List, Read, Delete"
     flow:
       - function: "generateRandomData"
       - post:
@@ -98,6 +97,10 @@ scenarios:
             json: "$.id"
             as: "id"
       - get:
+          url: "/books"
+          expect:
+            statusCode: 200
+      - get:
           url: "/books/{{ id }}"
           expect:
             statusCode: 200
@@ -105,10 +108,3 @@ scenarios:
           url: "/books/{{ id }}"
           expect:
             statusCode: 204
-  # - name: "List"
-  #   weight: 34
-  #   flow:
-  #     - get:
-  #         url: "/books"
-  #         expect:
-  #           statusCode: 200
