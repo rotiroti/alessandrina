@@ -1,0 +1,57 @@
+name: Manual Load Testing
+
+on:
+  workflow_dispatch:
+    inputs:
+      API_URL:
+        description: 'URL of the API to test'
+        required: true
+        default: ''
+
+env:
+    API_URL: ${{ github.event.inputs.API_URL }}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  load-tests:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    container: artilleryio/artillery:latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install additional dependencies
+        run: npm install -g artillery-plugin-expect artillery-plugin-ensure
+
+      - name: Make reports directory
+        run: mkdir reports
+
+      - name: Execute smoke test
+        run: |
+          API_URL=${{ env.API_URL }} /home/node/artillery/bin/run run --output reports/smoke.json tests/performance/smoke.yml
+          /home/node/artillery/bin/run report --output reports/smoke.html reports/smoke.json
+
+      - name: Execute functional test
+        run: |
+          API_URL=${{ env.API_URL }} /home/node/artillery/bin/run run --output reports/functional.json tests/performance/functional.yml
+          /home/node/artillery/bin/run report --output reports/functional.html reports/functional.json
+
+      - name: Execute load test (CRD book)
+        run: |
+          API_URL=${{ env.API_URL }} /home/node/artillery/bin/run run --output reports/load-crd.json tests/performance/load-crd.yml
+          /home/node/artillery/bin/run report --output reports/load-crd.html reports/load-crd.json
+
+      - name: Execute SLO test (p95=400, error rate=0.01)
+        run: |
+          API_URL=${{ env.API_URL }} /home/node/artillery/bin/run run --output reports/slo30sec10vus.json --environment=slo30sec10vus tests/performance/slo.yml
+          /home/node/artillery/bin/run report --output reports/slo30sec10vus.html reports/slo30sec10vus.json
+
+      - name: Archive test report
+        uses: actions/upload-artifact@v3
+        with:
+          name: artillery-test-report
+          path: reports/*
