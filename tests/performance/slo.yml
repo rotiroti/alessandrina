@@ -1,0 +1,70 @@
+config:
+  plugins:
+    ensure: {}
+    expect: {}
+  environments:
+    # 6 users for 30 seconds calling all endpoints (6 * 30 * 4 = 720 requests)
+    slo30sec6vus:
+      target: "{{ $processEnvironment.API_URL }}"
+      phases:
+        - name: "Service Level Objective 6 users"
+          duration: 30
+          arrivalRate: 6
+          maxVusers: 6
+    # 10 users for 30 seconds calling all endpoints (10 * 30 * 4 = 1200 requests)
+    slo30sec10vus:
+      target: "{{ $processEnvironment.API_URL }}"
+      phases:
+        - name: "Service Level Objective 10 users"
+          duration: 30
+          arrivalRate: 10
+          maxVusers: 10
+    # 15 users for 30 seconds calling all endpoints (10 * 30 * 4 = 1800 requests)
+    slo30sec15vus:
+      target: "{{ $processEnvironment.API_URL }}"
+      phases:
+        - name: "Service Level Objective 15 users"
+          duration: 30
+          arrivalRate: 15
+          maxVusers: 15
+  processor: "./generator.js"
+  default:
+    headers:
+      Accept: "application/json"
+      Content-Type: "application/json"
+  ensure:
+    p95: 400
+    maxErrorsRate: 1
+scenarios:
+  - name: "Create, List, Read, Delete"
+    flow:
+      - function: "generateRandomData"
+      - post:
+          url: "/books"
+          json:
+            title: "{{ title }}"
+            authors: "{{ authors }}"
+            isbn: "{{ isbn }}"
+            pages: "{{ pages }}"
+            publisher: "{{ publisher }}"
+          expect:
+            statusCode: 201
+            hasProperty: "id"
+          capture:
+            json: "$.id"
+            as: "id"
+      - think: 1
+      - get:
+          url: "/books"
+          expect:
+            statusCode: 200
+      - think: 1
+      - get:
+          url: "/books/{{ id }}"
+          expect:
+            statusCode: 200
+      - think: 1
+      - delete:
+          url: "/books/{{ id }}"
+          expect:
+            statusCode: 204
