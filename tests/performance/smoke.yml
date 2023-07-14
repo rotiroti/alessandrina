@@ -1,0 +1,60 @@
+# Smoke test for the API endpoints to ensure that they are returning
+# the correct status codes and JSON response.
+# For this test we assume that we will receive one new user per second during
+# one second. Each user will perform one request per second. At the end of the
+# test we will have 1 users that have performed 4 requests.
+# Note that we are using a custom processor to generate random data for the
+# creation of a new book and the capture of the book ID will be used in the
+# subsequent requests. Finally, we are using the "ensure" plugin to ensure that
+# the error rate is 0% to ensure that a new API version will be not deployed
+# in case of errors.
+config:
+  plugins:
+    ensure: {}
+    expect: {}
+  target: "{{ $processEnvironment.API_URL }}"
+  phases:
+    - name: "Smoke Test"
+      duration: 1
+      arrivalRate: 1
+      maxVusers: 1
+  processor: "./generator.js"
+  default:
+    headers:
+      Accept: "application/json"
+      Content-Type: "application/json"
+  ensure:
+    maxErrorRate: 0
+scenarios:
+  - name: "Create, List, Read, Delete"
+    flow:
+      - function: "generateRandomData"
+      - post:
+          url: "/books"
+          json:
+            title: "{{ title }}"
+            authors: "{{ authors }}"
+            isbn: "{{ isbn }}"
+            pages: "{{ pages }}"
+            publisher: "{{ publisher }}"
+          expect:
+            statusCode: 201
+            hasProperty: "id"
+          capture:
+            json: "$.id"
+            as: "id"
+      - think: 1
+      - get:
+          url: "/books"
+          expect:
+            statusCode: 200
+      - think: 1
+      - get:
+          url: "/books/{{ id }}"
+          expect:
+            statusCode: 200
+      - think: 1            
+      - delete:
+          url: "/books/{{ id }}"
+          expect:
+            statusCode: 204

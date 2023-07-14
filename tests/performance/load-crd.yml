@@ -1,0 +1,61 @@
+# Load test for testing the flow of creating a book, retrieving it, and deleting it.
+# Phase 1: Warm up, will receive 1 new users per second during a minute.
+# Phase 2: Ramp up load, will receive the users from 1 to 3 per second during 3 minutes.
+# Phase 3: Sustainability, will have 3 users per second during 2 minutes.
+# Phase 4: Ramp down load, will receive the users from 3 to 0 per second during 1 minute.
+config:
+  plugins:
+    ensure: {}
+    expect: {}
+  target: "{{ $processEnvironment.API_URL }}"
+  phases:
+    - name: "Warm up for 1 minute"
+      duration: 60
+      arrivalRate: 1
+    - name: "Ramp up to peak load in 3 minutes"
+      duration: 180
+      arrivalRate: 1
+      rampTo: 3
+    - name: "Sustain peak load for 2 minutes"
+      duration: 120
+      arrivalRate: 3
+    - name: "Ramp down to zero in 1 minute"
+      duration: 60
+      arrivalRate: 3
+      rampTo: 1
+  processor: "./generator.js"
+  default:
+    headers:
+      Accept: "application/json"
+      Content-Type: "application/json"
+  ensure:
+    p95: 400
+    maxErrorsRate: 0
+scenarios:
+  - name: "Create, Read, Delete"
+    flow:
+      - function: "generateRandomData"
+      - post:
+          url: "/books"
+          json:
+            title: "{{ title }}"
+            authors: "{{ authors }}"
+            isbn: "{{ isbn }}"
+            pages: "{{ pages }}"
+            publisher: "{{ publisher }}"
+          expect:
+            statusCode: 201
+            hasProperty: "id"
+          capture:
+            json: "$.id"
+            as: "id"
+      - think: 1
+      - get:
+          url: "/books/{{ id }}"
+          expect:
+            statusCode: 200
+      - think: 1
+      - delete:
+          url: "/books/{{ id }}"
+          expect:
+            statusCode: 204

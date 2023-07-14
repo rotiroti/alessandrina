@@ -242,15 +242,24 @@ jobs:
         run: mkdir reports
 
       - name: Execute smoke test
-        run: API_URL=${{ needs.integration-tests.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/smoke.json --environment=smoke-test tests/performance/flow.yml
-
-      # - name: Execute load test
-      #   run: API_URL=${{ needs.integration-tests.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/load.json --environment=load-test tests/performance/flow.yml
-
-      - name: Generate HTML reports
         run: |
+          API_URL=${{ needs.integration-tests.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/smoke.json tests/performance/smoke.yml
           /home/node/artillery/bin/run report --output reports/smoke.html reports/smoke.json
-          # /home/node/artillery/bin/run report --output reports/load.html reports/load.json
+
+      - name: Execute functional test
+        run: |
+          API_URL=${{ needs.integration-tests.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/functional.json tests/performance/functional.yml
+          /home/node/artillery/bin/run report --output reports/functional.html reports/functional.json
+
+      - name: Execute load test (CRD book)
+        run: |
+          API_URL=${{ needs.integration-tests.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/load-crd.json tests/performance/load-crd.yml
+          /home/node/artillery/bin/run report --output reports/load-crd.html reports/load-crd.json
+
+      - name: Execute SLO test (p95=400, error rate=0.01)
+        run: |
+          API_URL=${{ needs.integration-tests.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/slo30sec10vus.json --environment=slo30sec10vus tests/performance/slo.yml
+          /home/node/artillery/bin/run report --output reports/slo30sec10vus.html reports/slo30sec10vus.json
 
       - name: Archive test report
         uses: actions/upload-artifact@v3
