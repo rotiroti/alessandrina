@@ -18,6 +18,21 @@ Globals:
 Resources:
   BooksAPI:
     Type: AWS::Serverless::HttpApi
+    Properties:
+      FailOnWarnings: True
+      AccessLogSettings:
+        DestinationArn: !GetAtt AccessLogs.Arn
+        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod","routeKey":"$context.routeKey", "status":"$context.status","protocol":"$context.protocol", "integrationStatus": $context.integrationStatus, "integrationLatency": $context.integrationLatency, "responseLength":"$context.responseLength" }'
+      Tags:
+        Name: !Sub "${AWS::StackName}-API"
+        Stack: !Sub "${AWS::StackName}"
+
+  # API Gateway access logs group with retention period
+  AccessLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 15
+      LogGroupName: !Sub "/${AWS::StackName}/APIAccessLogs"
 
   BooksTable:
     Type: AWS::Serverless::SimpleTable
@@ -128,6 +143,10 @@ Outputs:
   WebEndpoint:
     Description: "API Gateway endpoint URL for the Books API"
     Value: !Sub "https://${BooksAPI}.execute-api.${AWS::Region}.amazonaws.com/"
+
+  AccessLogs:
+    Description: "CloudWatch Logs group for API Gateway access logs"
+    Value: !Ref AccessLogs
 
   GetBooksFunction:
     Description: "GetBooks Lambda Function ARN"
