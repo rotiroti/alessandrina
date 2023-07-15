@@ -7,9 +7,14 @@ on:
         description: 'URL of the API to test'
         required: true
         default: ''
+      SLO_TEST:
+        description: 'SLO test: slo30sec6vus, slo30sec10vus, slo30sec15vus'
+        required: false
+        default: 'slo30sec10vus'
 
 env:
     API_URL: ${{ github.event.inputs.API_URL }}
+    SLO_TEST: ${{ github.event.inputs.SLO_TEST }}
 
 permissions:
   id-token: write
@@ -47,8 +52,8 @@ jobs:
 
       - name: Execute SLO test (p95=400, error rate=0.01)
         run: |
-          API_URL=${{ env.API_URL }} /home/node/artillery/bin/run run --output reports/slo30sec10vus.json --environment=slo30sec10vus tests/performance/slo.yml
-          /home/node/artillery/bin/run report --output reports/slo30sec10vus.html reports/slo30sec10vus.json
+          API_URL=${{ env.API_URL }} /home/node/artillery/bin/run run --output reports/${{ env.SLO_TEST }}.json --environment=${{ env.SLO_TEST }} tests/performance/slo.yml
+          /home/node/artillery/bin/run report --output reports/${{ env.SLO_TEST }}.html reports/${{ env.SLO_TEST }}.json
 
       - name: Archive test report
         uses: actions/upload-artifact@v3
