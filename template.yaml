@@ -13,7 +13,10 @@ Globals:
         AWS_CLIENT_DEBUG: false
     AutoPublishAlias: live
     DeploymentPreference:
-      Type: Linear10PercentEvery1Minute
+      Type: !If [IsProduction, "Canary10Percent5Minutes", "AllAtOnce"]
+
+Conditions:
+  IsProduction: !Equals [!Ref "AWS::StackName", "alessandrina-prod"]
 
 Resources:
   BooksAPI:
