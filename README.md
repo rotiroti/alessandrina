@@ -19,51 +19,43 @@ To set up and run this serverless application locally or in a cloud environment,
 
 Once you have these prerequisites, you can set up and run the serverless application locally or deploy it to your preferred cloud environment.
 
+## Serverless Architecture
+
+<p align="center">
+  <img src="assets/architecture.png" alt="Alessandrina Architecture"/>
+</p>
+
 ## Project Structure
 
 The serverless application is structured using the *hexagonal architecture* known as *ports and adapters*. This architectural pattern provides a way to separate the core business logic (`domain`) of the application from specific technical implementations, like the infrastructure (`database`) and the handling of client requests (`web`). Encapsulating the domain logic within the hexagon makes it easier to maintain and modify the application without affecting other components.
 
 ```shell
+├── assets
 ├── domain
-│  ├── book.go
-│  ├── book_test.go
-│  ├── mock_storer_test.go
-│  ├── mock_uuid_generator_test.go
-│  └── model.go
 ├── events
-│  └── create.json
 ├── functions
-│  └── create-book
-│     └── main.go
+│  ├── create-book
+│  ├── delete-book
+│  ├── get-book
+│  └── get-books
 ├── go.mod
 ├── go.sum
+├── locals.json
 ├── Makefile
 ├── README.md
 ├── samconfig.toml
 ├── scripts
-│  └── create-table.sh
+│  ├── create-table.sh
+│  └── delete-table.sh
 ├── sys
 │  └── database
 │     ├── ddb
-│     │  ├── ddb.go
-│     │  ├── ddb_test.go
-│     │  ├── mock_dynamodb_api_test.go
-│     │  └── model.go
 │     └── memory
-│        ├── memory.go
-│        └── memory_test.go
 ├── template.yaml
 ├── tests
 │  ├── integration
-│  │  └── main_test.go
 │  └── performance
-│     ├── books50.csv
-│     ├── load.yml
-│     └── spike.yml
 └── web
-   ├── apigateway.go
-   ├── apigateway_test.go
-   └── model.go
 ```
 
 ### `/functions`
@@ -79,7 +71,10 @@ The `/tests` folder houses a collection of `integration` and `performance` tests
 This folder contains multiple event bodies that can be passed to SAM when invoking the AWS serverless functions locally.
 
 ```shell
-sam local invoke -e events/<EVENT_NAME>.json
+sam local invoke CreateBookFunction \
+   -e events/create-book.json \
+   --docker-network alessandrina \
+   --env-vars locals.json
 ```
 
 ### `/scripts`
@@ -91,11 +86,6 @@ This folder contains shell scripts to perform migrations when running DynamoDB o
 The serverless application can be configured via some environment variables.
 
 ```shell
-# Use the in-memory database (sys/database/memory package)
-#
-# NOTE: The variable will soon be deprecated and left only for unit testing.
-STORAGE_MEMORY=false
-
 # Set the table name (required when using DynamoDB storage)
 TABLE_NAME=BooksTable-local
 
@@ -136,24 +126,9 @@ make clean
 
 ## Integration Tests
 
-### In-memory database
+The integration tests assume that you have already installed all the requirements mentioned in the "Requirements" section.
 
-This setup assume you have alredy installed all the previous requirements.
-
-```shell
-# 1. Build the serverless application.
-sam build --debug
-
-# 2. Start a local HTTP API server using a mock (in-memory) database.
-STORAGE_MEMORY=true sam local start-api --debug
-
-# 3. Open another shell and execute the command in the project's root directory.
-make integration-tests
-```
-
-### AWS DynamoDB (Localstack)
-
-These stesp assume that you have already installed all the requirements mentioned in the "Requirements" section.
+### SAM Local API + Localstack DynamoDB
 
 ```shell
 # 1. Create a Docker network
@@ -166,11 +141,24 @@ DOCKER_FLAGS="--network alessandrina -d" localstack start
 sh ./scripts/create-table.sh BooksTable-local
 
 # 4. Build the serverless application.
-sam build --debug
+sam build --parallel
 
 # 5. Start a local HTTP API server using the "BooksTable-local" DynamoDB table.
 sam local start-api --docker-network alessandrina --warm-containers LAZY --env-vars locals.json
 
 # 6. Open another shell and execute the command in the project's root directory.
-make integration-tests
+make integration-tests \
+   LOCALSTACK=true \
+   TABLE_NAME=BooksTable-local \
+   AWS_ENDPOINT=http://localstack_main:4566
+```
+
+### Deployed Environment (feature,dev or prod)
+
+```shell
+# 1. Build the serverless application
+sam build --parallel
+
+# 2.
+make integration-tests API_URL=<DEPLOYED_STACK_API_URL>
 ```
