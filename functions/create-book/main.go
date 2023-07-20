@@ -102,10 +102,10 @@ func run(ctx context.Context) error {
 	}
 
 	// Instantiate a new domain service
-	service := domain.NewService(store)
+	bookCore := domain.NewBookCore(store)
 
 	// Instantiate a new handler
-	handler := web.NewAPIGatewayV2Handler(service)
+	handler := web.NewAPIGatewayV2Handler(bookCore)
 
 	// Start the lambda handler listening for CreateBook events.
 	lambda.Start(handler.CreateBook)

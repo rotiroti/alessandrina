@@ -29,29 +29,29 @@ type Storer interface {
 	Delete(ctx context.Context, bookID uuid.UUID) error
 }
 
-// Service is the domain service for Book.
-type Service struct {
+// BookCore manages the set of APIs for book access.
+type BookCore struct {
 	storer    Storer
 	generator UUIDGenerator
 }
 
-// NewService returns a new instance of Service.
-func NewService(storer Storer) *Service {
-	return NewServiceWithGenerator(storer, uuid.New)
+// NewBookCore constructs a core for book API access.
+func NewBookCore(storer Storer) *BookCore {
+	return NewBookCoreWithGenerator(storer, uuid.New)
 }
 
-// NewServiceWithGenerator returns a new instance of Service with a custom UUIDGenerator.
-func NewServiceWithGenerator(storer Storer, generator UUIDGenerator) *Service {
-	return &Service{
+// NewBookCore constructs a core for book API access with a custom UUIDGenerator.
+func NewBookCoreWithGenerator(storer Storer, generator UUIDGenerator) *BookCore {
+	return &BookCore{
 		storer:    storer,
 		generator: generator,
 	}
 }
 
-// Save adds a new book into a storage.
-func (s *Service) Save(ctx context.Context, nb NewBook) (Book, error) {
+// Save inserts a new book into a storage.
+func (c *BookCore) Save(ctx context.Context, nb NewBook) (Book, error) {
 	book := Book{
-		ID:        s.generator(),
+		ID:        c.generator(),
 		Title:     nb.Title,
 		Authors:   nb.Authors,
 		Publisher: nb.Publisher,
@@ -59,7 +59,7 @@ func (s *Service) Save(ctx context.Context, nb NewBook) (Book, error) {
 		ISBN:      nb.ISBN,
 	}
 
-	if err := s.storer.Save(ctx, book); err != nil {
+	if err := c.storer.Save(ctx, book); err != nil {
 		return Book{}, fmt.Errorf("save: %w", err)
 	}
 
@@ -67,8 +67,8 @@ func (s *Service) Save(ctx context.Context, nb NewBook) (Book, error) {
 }
 
 // FindAll returns all books from a storage.
-func (s *Service) FindAll(ctx context.Context) ([]Book, error) {
-	books, err := s.storer.FindAll(ctx)
+func (c *BookCore) FindAll(ctx context.Context) ([]Book, error) {
+	books, err := c.storer.FindAll(ctx)
 	if err != nil {
 		return []Book{}, fmt.Errorf("findall: %w", err)
 	}
@@ -77,8 +77,8 @@ func (s *Service) FindAll(ctx context.Context) ([]Book, error) {
 }
 
 // FindOne returns a book from a storage by using bookID as primary key.
-func (s *Service) FindOne(ctx context.Context, bookID uuid.UUID) (Book, error) {
-	book, err := s.storer.FindOne(ctx, bookID)
+func (c *BookCore) FindOne(ctx context.Context, bookID uuid.UUID) (Book, error) {
+	book, err := c.storer.FindOne(ctx, bookID)
 	if err != nil {
 		return Book{}, fmt.Errorf("findone: bookID[%s]: %w", bookID, err)
 	}
@@ -87,8 +87,8 @@ func (s *Service) FindOne(ctx context.Context, bookID uuid.UUID) (Book, error) {
 }
 
 // Delete removes a book from a storage by using bookID as primary key.
-func (s *Service) Delete(ctx context.Context, bookID uuid.UUID) error {
-	if err := s.storer.Delete(ctx, bookID); err != nil {
+func (c *BookCore) Delete(ctx context.Context, bookID uuid.UUID) error {
+	if err := c.storer.Delete(ctx, bookID); err != nil {
 		return fmt.Errorf("delete: bookID[%s]: %w", bookID, err)
 	}
 

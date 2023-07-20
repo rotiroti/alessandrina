@@ -9,25 +9,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSave(t *testing.T) {
-	t.Parallel()
-
-	// Create a mock instance of the Storer interface
-	mockStorer := domain.NewMockStorer(t)
-
-	// Generate a fixed UUID for the test
-	expectedID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812")
-
-	// Generate a fixed UUID for the test
-	mockGenerator := func() uuid.UUID {
-		return expectedID
+func setup(t *testing.T) (*domain.MockStorer, uuid.UUID, func() uuid.UUID) {
+	storer := domain.NewMockStorer(t)
+	bookID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812")
+	generator := func() uuid.UUID {
+		return bookID
 	}
 
-	// Create an instance of the Service struct with the mockStorer
-	service := domain.NewServiceWithGenerator(mockStorer, mockGenerator)
+	return storer, bookID, generator
+}
 
-	// Set up the expected inputs and outputs
-	ctx := context.TODO()
+func TestBookCore(t *testing.T) {
+	storer, expectedID, generator := setup(t)
+	ctx := context.Background()
+	core := domain.NewBookCore(storer)
 	newBook := domain.NewBook{
 		Title:     "Test Book",
 		Authors:   "Test Author",
@@ -44,258 +39,82 @@ func TestSave(t *testing.T) {
 		ISBN:      newBook.ISBN,
 	}
 
-	// Set up the expectations for the mockStorer's Save method
-	mockStorer.EXPECT().Save(ctx, expectedBook).Return(nil).Once()
-
-	// Call the Save method of the service
-	createdBook, err := service.Save(ctx, newBook)
-
-	// Assert the expected output
-	assert.NoError(t, err)
-	assert.Equal(t, expectedBook, createdBook)
-
-	// Assert that the mockStorer's expectations were met
-	mockStorer.AssertExpectations(t)
-}
-
-func TestSaveFail(t *testing.T) {
-	t.Parallel()
-
-	// Create a mock instance of the Storer interface
-	mockStorer := domain.NewMockStorer(t)
-
-	// Generate a fixed UUID for the test
-	expectedID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812")
-
-	// Generate a fixed UUID for the test
-	mockGenerator := func() uuid.UUID {
-		return expectedID
-	}
-
-	// Create an instance of the Service struct with the mockStorer
-	service := domain.NewServiceWithGenerator(mockStorer, mockGenerator)
-
-	// Set up the expected inputs and outputs
-	ctx := context.TODO()
-	newBook := domain.NewBook{
-		Title:     "Test Book",
-		Authors:   "Test Author",
-		Publisher: "Test Publisher",
-		Pages:     100,
-		ISBN:      "Test ISBN",
-	}
-	expectedBook := domain.Book{
-		ID:        expectedID,
-		Title:     newBook.Title,
-		Authors:   newBook.Authors,
-		Publisher: newBook.Publisher,
-		Pages:     newBook.Pages,
-		ISBN:      newBook.ISBN,
-	}
-
-	// Set up the expectations for the mockStorer's Save method
-	mockStorer.EXPECT().Save(ctx, expectedBook).Return(assert.AnError).Once()
-
-	// Call the Save method of the service
-	createdBook, err := service.Save(ctx, newBook)
-
-	// Assert the expected output
-	assert.Error(t, err)
-	assert.Equal(t, domain.Book{}, createdBook)
-
-	// Assert that the mockStorer's expectations were met
-	mockStorer.AssertExpectations(t)
-}
-
-func TestFindOne(t *testing.T) {
-	t.Parallel()
-
-	// Create a mock instance of the Storer interface
-	mockStorer := domain.NewMockStorer(t)
-
-	// Generate a fixed UUID for the test
-	expectedID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812")
-
-	// Create an instance of the Service struct with the mockStorer
-	service := domain.NewService(mockStorer)
-
-	// Set up the expected inputs and outputs
-	ctx := context.TODO()
-	expectedBook := domain.Book{
-		ID:        expectedID,
-		Title:     "Test Book",
-		Authors:   "Test Authors",
-		Publisher: "Test Publisher",
-		ISBN:      "Test ISBN",
-		Pages:     100,
-	}
-
-	// Set up the expectations for the mockStorer's FindOne method
-	mockStorer.EXPECT().FindOne(ctx, expectedID).Return(expectedBook, nil).Once()
-
-	// Call the FindOne method of the service
-	foundBook, err := service.FindOne(ctx, expectedID)
-
-	// Assert the expected output
-	assert.NoError(t, err)
-	assert.Equal(t, expectedBook, foundBook)
-
-	// Assert that the mockStorer's expectations were met
-	mockStorer.AssertExpectations(t)
-}
-
-func TestFindOneFail(t *testing.T) {
-	t.Parallel()
-
-	// Create a mock instance of the Storer interface
-	mockStorer := domain.NewMockStorer(t)
-
-	// Generate a fixed UUID for the test
-	bookID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812")
-
-	// Create an instance of the Service struct with the mockStorer
-	service := domain.NewService(mockStorer)
-
-	// Set up the expected inputs and outputs
-	ctx := context.TODO()
-
-	// Set up the expectations for the mockStorer's FindOne method
-	mockStorer.EXPECT().FindOne(ctx, bookID).Return(domain.Book{}, assert.AnError).Once()
-
-	// Call the FindOne method of the service
-	foundBook, err := service.FindOne(ctx, bookID)
-
-	// Assert the expected output
-	assert.Error(t, err)
-	assert.Equal(t, domain.Book{}, foundBook)
-
-	// Assert that the mockStorer's expectations were met
-	mockStorer.AssertExpectations(t)
-}
-
-func TestDelete(t *testing.T) {
-	t.Parallel()
-
-	// Create a mock instance of the Storer interface
-	mockStorer := domain.NewMockStorer(t)
-
-	// Generate a fixed UUID for the test
-	expectedID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812")
-
-	// Create an instance of the Service struct with the mockStorer
-	service := domain.NewService(mockStorer)
-
-	// Set up the expected inputs and outputs
-	ctx := context.TODO()
-
-	// Set up the expectations for the mockStorer's Delete method
-	mockStorer.EXPECT().Delete(ctx, expectedID).Return(nil).Once()
-
-	// Call the Delete method of the service
-	err := service.Delete(ctx, expectedID)
-
-	// Assert the expected output
-	assert.NoError(t, err)
-
-	// Assert that the mockStorer's expectations were met
-	mockStorer.AssertExpectations(t)
-}
-
-func TestDeleteFail(t *testing.T) {
-	t.Parallel()
-
-	// Create a mock instance of the Storer interface
-	mockStorer := domain.NewMockStorer(t)
-
-	// Generate a fixed UUID for the test
-	bookID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812")
-
-	// Create an instance of the Service struct with the mockStorer
-	service := domain.NewService(mockStorer)
-
-	// Set up the expected inputs and outputs
-	ctx := context.TODO()
-
-	// Set up the expectations for the mockStorer's Delete method
-	mockStorer.EXPECT().Delete(ctx, bookID).Return(assert.AnError).Once()
-
-	// Call the Delete method of the service
-	err := service.Delete(ctx, bookID)
-
-	// Assert the expected output
-	assert.Error(t, err)
-
-	// Assert that the mockStorer's expectations were met
-	mockStorer.AssertExpectations(t)
-}
-
-func TestFindAll(t *testing.T) {
-	t.Parallel()
-
-	// Create a mock instance of the Storer interface
-	mockStorer := domain.NewMockStorer(t)
-
-	// Set up the expected inputs and outputs
-	ctx := context.TODO()
-	expectedBooks := []domain.Book{
-		{
-			ID:        uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812"),
-			Title:     "Test Book",
-			Authors:   "Test Authors",
-			Publisher: "Test Publisher",
-			ISBN:      "Test ISBN",
-			Pages:     100,
-		},
-		{
-			ID:        uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c813"),
-			Title:     "Test Book 2",
-			Authors:   "Test Authors 2",
-			Publisher: "Test Publisher 2",
-			ISBN:      "Test ISBN 2",
-			Pages:     200,
-		},
-	}
-
-	// // Set up the expectations for the mockStorer's FindAll method
-	mockStorer.EXPECT().FindAll(ctx).Return(expectedBooks, nil).Once()
-
-	// Create an instance of the Service struct with the mockStorer
-	service := domain.NewService(mockStorer)
-
-	// Call the FindAll method of the service
-	foundBooks, err := service.FindAll(ctx)
-
-	// Assert the expected output
-	assert.NoError(t, err)
-	assert.Equal(t, expectedBooks, foundBooks)
-
-	// Assert that the mockStorer's expectations were met
-	mockStorer.AssertExpectations(t)
-}
-
-func TestFindAllFail(t *testing.T) {
-	t.Parallel()
-
-	// Create a mock instance of the Storer interface
-	mockStorer := domain.NewMockStorer(t)
-
-	// Set up the expected inputs and outputs
-	ctx := context.TODO()
-	expectedBooks := []domain.Book{}
-
-	// // Set up the expectations for the mockStorer's FindAll method
-	mockStorer.EXPECT().FindAll(ctx).Return(expectedBooks, assert.AnError).Once()
-
-	// Create an instance of the Service struct with the mockStorer
-	service := domain.NewService(mockStorer)
-
-	// Call the FindAll method of the service
-	foundBooks, err := service.FindAll(ctx)
-
-	// Assert the expected output
-	assert.Error(t, err)
-	assert.Equal(t, expectedBooks, foundBooks)
-
-	// Assert that the mockStorer's expectations were met
-	mockStorer.AssertExpectations(t)
+	t.Run("Save", func(t *testing.T) {
+		coreWithGenerator := domain.NewBookCoreWithGenerator(storer, generator)
+		storer.EXPECT().Save(ctx, expectedBook).Return(nil).Once()
+		createdBook, err := coreWithGenerator.Save(ctx, newBook)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedBook, createdBook)
+		storer.AssertExpectations(t)
+	})
+
+	t.Run("SaveFail", func(t *testing.T) {
+		coreWithGenerator := domain.NewBookCoreWithGenerator(storer, generator)
+		storer.EXPECT().Save(ctx, expectedBook).Return(assert.AnError).Once()
+		createdBook, err := coreWithGenerator.Save(ctx, newBook)
+		assert.Error(t, err)
+		assert.Equal(t, domain.Book{}, createdBook)
+		storer.AssertExpectations(t)
+	})
+
+	t.Run("FindAll", func(t *testing.T) {
+		expectedBooks := []domain.Book{
+			{
+				ID: uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812"),
+			},
+			{
+				ID: uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c813"),
+			},
+			{
+				ID: uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c814"),
+			},
+		}
+
+		storer.EXPECT().FindAll(ctx).Return(expectedBooks, nil).Once()
+		foundBooks, err := core.FindAll(ctx)
+		assert.NoError(t, err)
+		assert.Equal(t, len(expectedBooks), len(foundBooks))
+		assert.Equal(t, expectedBooks, foundBooks)
+		storer.AssertExpectations(t)
+	})
+
+	t.Run("FindAllFail", func(t *testing.T) {
+		expectedBooks := []domain.Book{}
+		storer.EXPECT().FindAll(ctx).Return(expectedBooks, assert.AnError).Once()
+		foundBooks, err := core.FindAll(ctx)
+		assert.Error(t, err)
+		assert.Equal(t, expectedBooks, foundBooks)
+		storer.AssertExpectations(t)
+	})
+
+	t.Run("FindOne", func(t *testing.T) {
+		storer.EXPECT().FindOne(ctx, expectedID).Return(expectedBook, nil).Once()
+		foundBook, err := core.FindOne(ctx, expectedID)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedBook, foundBook)
+		storer.AssertExpectations(t)
+	})
+
+	t.Run("FindOneFail ", func(t *testing.T) {
+		ret := domain.Book{}
+		storer.EXPECT().FindOne(ctx, expectedID).Return(ret, assert.AnError).Once()
+		foundBook, err := core.FindOne(ctx, expectedID)
+		assert.Error(t, err)
+		assert.Equal(t, ret, foundBook)
+		storer.AssertExpectations(t)
+	})
+
+	t.Run("Delete", func(t *testing.T) {
+		storer.EXPECT().Delete(ctx, expectedID).Return(nil).Once()
+		err := core.Delete(ctx, expectedID)
+		assert.NoError(t, err)
+		storer.AssertExpectations(t)
+	})
+
+	t.Run("DeleteFail", func(t *testing.T) {
+		storer.EXPECT().Delete(ctx, expectedID).Return(assert.AnError).Once()
+		err := core.Delete(ctx, expectedID)
+		assert.Error(t, err)
+		storer.AssertExpectations(t)
+	})
 }

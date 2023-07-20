@@ -81,10 +81,10 @@ func run(ctx context.Context) error {
 	store := ddb.NewStore(tableName, dynamodb.NewFromConfig(conf))
 
 	// Instantiate a new domain service
-	service := domain.NewService(store)
+	bookCore := domain.NewBookCore(store)
 
 	// Instantiate a new handler
-	handler := web.NewAPIGatewayV2Handler(service)
+	handler := web.NewAPIGatewayV2Handler(bookCore)
 
 	// Start the lambda handler listening for GetBook events.
 	lambda.Start(handler.GetBook)
