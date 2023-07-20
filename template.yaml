@@ -24,11 +24,14 @@ Resources:
     Properties:
       AccessLogSettings:
         DestinationArn: !GetAtt AccessLogGroup.Arn
+        Format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":$context.status,"responseLatency":$context.responseLatency}'
+
 
   AccessLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub "/aws/apigateway/${AWS::StackName}/access_log"
+      RetentionInDays: 7
 
   BooksTable:
     Type: AWS::Serverless::SimpleTable
