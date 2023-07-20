@@ -58,7 +58,7 @@ func TestDynamodbFlow(t *testing.T) {
 
 	t.Run("SaveTableNotExist", func(t *testing.T) {
 		conf := ddb.Config{TableName: "not-exist"}
-		store, err := ddb.NewStore(context.Background(), conf)
+		store, err := ddb.NewStore(ctx, conf)
 
 		require.NoError(t, err)
 
