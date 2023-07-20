@@ -26,7 +26,6 @@ Resources:
         DestinationArn: !GetAtt AccessLogGroup.Arn
         Format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":$context.status,"responseLatency":$context.responseLatency}'
 
-
   AccessLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -66,6 +65,12 @@ Resources:
               Action: dynamodb:Scan
               Resource: !GetAtt BooksTable.Arn
 
+  GetBooksLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${GetBooksFunction}"
+      RetentionInDays: 7
+
   GetBookFunction:
     Type: AWS::Serverless::Function
     Metadata:
@@ -88,6 +93,12 @@ Resources:
             - Effect: Allow
               Action: dynamodb:GetItem
               Resource: !GetAtt BooksTable.Arn
+
+  GetBookLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${GetBookFunction}"
+      RetentionInDays: 7
 
   CreateBookFunction:
     Type: AWS::Serverless::Function
@@ -112,6 +123,12 @@ Resources:
               Action: dynamodb:PutItem
               Resource: !GetAtt BooksTable.Arn
 
+  CreateBookLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${CreateBookFunction}"
+      RetentionInDays: 7
+
   DeleteBookFunction:
     Type: AWS::Serverless::Function
     Metadata:
@@ -134,6 +151,12 @@ Resources:
             - Effect: Allow
               Action: dynamodb:DeleteItem
               Resource: !GetAtt BooksTable.Arn
+
+  DeleteBookLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${DeleteBookFunction}"
+      RetentionInDays: 7
 
 Outputs:
   WebEndpoint:
