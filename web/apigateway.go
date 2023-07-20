@@ -12,13 +12,13 @@ import (
 
 // APIGatewayV2Handler is the handler for the API Gateway v2.
 type APIGatewayV2Handler struct {
-	service *domain.Service
+	book *domain.BookCore
 }
 
 // NewAPIGatewayV2Handler returns a new APIGatewayV2Handler.
-func NewAPIGatewayV2Handler(service *domain.Service) *APIGatewayV2Handler {
+func NewAPIGatewayV2Handler(book *domain.BookCore) *APIGatewayV2Handler {
 	return &APIGatewayV2Handler{
-		service: service,
+		book: book,
 	}
 }
 
@@ -31,22 +31,22 @@ func (h *APIGatewayV2Handler) CreateBook(ctx context.Context, req events.APIGate
 	}
 
 	domainNewBook := ToDomainNewBook(appNewBook)
-	book, err := h.service.Save(ctx, domainNewBook)
+	ret, err := h.book.Save(ctx, domainNewBook)
 	if err != nil {
 		return errorResponse(http.StatusInternalServerError, err.Error()), nil
 	}
 
-	return jsonResponse(http.StatusCreated, ToAppBook(book)), nil
+	return jsonResponse(http.StatusCreated, ToAppBook(ret)), nil
 }
 
 // GetBooks handles requests for getting all books.
 func (h *APIGatewayV2Handler) GetBooks(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
-	books, err := h.service.FindAll(ctx)
+	ret, err := h.book.FindAll(ctx)
 	if err != nil {
 		return errorResponse(http.StatusInternalServerError, err.Error()), nil
 	}
 
-	return jsonResponse(http.StatusOK, ToAppListBooks(books)), nil
+	return jsonResponse(http.StatusOK, ToAppListBooks(ret)), nil
 }
 
 // GetBook handles requests for getting a book by a given ID (UUID).
@@ -56,12 +56,12 @@ func (h *APIGatewayV2Handler) GetBook(ctx context.Context, req events.APIGateway
 		return errorResponse(http.StatusBadRequest, err.Error()), nil
 	}
 
-	book, err := h.service.FindOne(ctx, id)
+	ret, err := h.book.FindOne(ctx, id)
 	if err != nil {
 		return errorResponse(http.StatusInternalServerError, err.Error()), nil
 	}
 
-	return jsonResponse(http.StatusOK, ToAppBook(book)), nil
+	return jsonResponse(http.StatusOK, ToAppBook(ret)), nil
 }
 
 // DeleteBook handles requests for deleting a book by a given ID (UUID).
@@ -71,7 +71,7 @@ func (h *APIGatewayV2Handler) DeleteBook(ctx context.Context, req events.APIGate
 		return errorResponse(http.StatusBadRequest, err.Error()), nil
 	}
 
-	if err := h.service.Delete(ctx, id); err != nil {
+	if err := h.book.Delete(ctx, id); err != nil {
 		return errorResponse(http.StatusInternalServerError, err.Error()), nil
 	}
 

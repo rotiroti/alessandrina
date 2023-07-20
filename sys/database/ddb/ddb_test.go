@@ -15,116 +15,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestDynamoDBStore_Save(t *testing.T) {
-	t.Parallel()
-
-	tableName := "test-table"
-
-	// Create a mock instance of the DynamoDB interface
-	mockDynamoDB := ddb.NewMockDynamodbAPI(t)
-
-	// Create a new store using the mock DynamoDB instance
-	store := ddb.NewStore(tableName, mockDynamoDB)
-
-	// Set up the expected inputs and outputs
-	ctx := context.Background()
+func setup(t *testing.T) (*ddb.Store, *ddb.MockDynamodbAPI, string, uuid.UUID) {
+	table := "test-table"
+	client := ddb.NewMockDynamodbAPI(t)
+	store := ddb.NewStore(table, client)
 	bookID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812")
-	book := domain.Book{
-		ID:        bookID,
-		Title:     "The Lord of the Rings",
-		Authors:   "J.R.R. Tolkien",
-		Pages:     1178,
-		Publisher: "George Allen & Unwin",
-		ISBN:      "978-0-261-10235-4",
-	}
-	saveBookItem, err := attributevalue.MarshalMap(ddb.ToDynamodbBook(book))
-	require.NoError(t, err)
 
-	expectedInput := &dynamodb.PutItemInput{
-		Item:      saveBookItem,
-		TableName: aws.String(tableName),
-	}
-
-	// Expect a call to PutItem with the expected input and return no error
-	mockDynamoDB.EXPECT().PutItem(ctx, expectedInput).Return(nil, nil).Once()
-
-	// Call the Save method of the store
-	err = store.Save(context.Background(), book)
-
-	// Assert the expected output
-	require.NoError(t, err)
-
-	// Assert that the mockDynamoDB's expectations were met
-	mockDynamoDB.AssertExpectations(t)
+	return store, client, table, bookID
 }
 
-func TestDynamoDBStore_SaveFail(t *testing.T) {
-	t.Parallel()
-
-	tableName := "test-table"
-
-	// Create a mock instance of the DynamoDB interface
-	mockDynamoDB := ddb.NewMockDynamodbAPI(t)
-
-	// Create a new store using the mock DynamoDB instance
-	store := ddb.NewStore(tableName, mockDynamoDB)
-
-	// Set up the expected inputs and outputs
+func TestStore(t *testing.T) {
+	store, client, table, bookID := setup(t)
 	ctx := context.Background()
-	bookID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812")
-	book := domain.Book{
-		ID:        bookID,
-		Title:     "The Lord of the Rings",
-		Authors:   "J.R.R. Tolkien",
-		Pages:     1178,
-		Publisher: "George Allen & Unwin",
-		ISBN:      "978-0-261-10235-4",
-	}
-
-	saveBookItem, err := attributevalue.MarshalMap(ddb.ToDynamodbBook(book))
-	require.NoError(t, err)
-
-	expectedInput := &dynamodb.PutItemInput{
-		Item:      saveBookItem,
-		TableName: aws.String(tableName),
-	}
-
-	// Expect a call to PutItem with the expected input and return no error
-	mockDynamoDB.EXPECT().PutItem(ctx, expectedInput).Return(&dynamodb.PutItemOutput{}, assert.AnError).Once()
-
-	// Call the Save method of the store
-	err = store.Save(context.Background(), book)
-
-	// Assert the expected output
-	require.Error(t, err)
-
-	// Assert that the mockDynamoDB's expectations were met
-	mockDynamoDB.AssertExpectations(t)
-}
-
-func TestDynamoDBStore_FindOne(t *testing.T) {
-	t.Parallel()
-
-	tableName := "test-table"
-
-	// Create a mock instance of the DynamoDB interface
-	mockDynamoDB := ddb.NewMockDynamodbAPI(t)
-
-	// Create a new store using the mock DynamoDB instance
-	store := ddb.NewStore(tableName, mockDynamoDB)
-
-	// Set up the expected inputs and outputs
-	ctx := context.Background()
-	bookID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812")
-	keyItem := map[string]types.AttributeValue{
-		"id": &types.AttributeValueMemberS{Value: bookID.String()},
-	}
-	expectedGetItemInput := &dynamodb.GetItemInput{
-		Key:       keyItem,
-		TableName: aws.String(tableName),
-	}
-
-	// Create a mock DynamoDB GetItemOutput
 	expectedBook := domain.Book{
 		ID:        bookID,
 		Title:     "The Lord of the Rings",
@@ -133,246 +35,112 @@ func TestDynamoDBStore_FindOne(t *testing.T) {
 		Publisher: "George Allen & Unwin",
 		ISBN:      "978-0-261-10235-4",
 	}
-
-	getItemOutput, err := attributevalue.MarshalMap(ddb.ToDynamodbBook(expectedBook))
-	require.NoError(t, err)
-
-	// Expect a call to GetItem with the expected input and return the mock output
-	mockDynamoDB.EXPECT().GetItem(ctx, expectedGetItemInput).Return(
-		&dynamodb.GetItemOutput{
-			Item: getItemOutput,
-		},
-		nil,
-	).Once()
-
-	// Call the FindOne method of the store
-	foundBook, err := store.FindOne(ctx, bookID)
-
-	// Assert the expected output
-	require.NoError(t, err)
-	assert.Equal(t, expectedBook, foundBook)
-
-	// Assert that the mockDynamoDB's expectations were met
-	mockDynamoDB.AssertExpectations(t)
-}
-
-func TestDynamoDBStore_FindOneFail(t *testing.T) {
-	t.Parallel()
-
-	tableName := "test-table"
-
-	// Create a mock instance of the DynamoDB interface
-	mockDynamoDB := ddb.NewMockDynamodbAPI(t)
-
-	// Create a new store using the mock DynamoDB instance
-	store := ddb.NewStore(tableName, mockDynamoDB)
-
-	// Set up the expected inputs and outputs
-	ctx := context.Background()
-	bookID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812")
-	keyItem := map[string]types.AttributeValue{
+	expectedPutItemInput := &dynamodb.PutItemInput{
+		TableName: aws.String(table),
+	}
+	expectedKey := map[string]types.AttributeValue{
 		"id": &types.AttributeValueMemberS{Value: bookID.String()},
 	}
 	expectedGetItemInput := &dynamodb.GetItemInput{
-		Key:       keyItem,
-		TableName: aws.String(tableName),
+		Key:       expectedKey,
+		TableName: aws.String(table),
 	}
-
-	// Expect a call to GetItem with the expected input and return the mock output
-	mockDynamoDB.EXPECT().GetItem(ctx, expectedGetItemInput).Return(&dynamodb.GetItemOutput{}, assert.AnError).Once()
-
-	// Call the FindOne method of the store
-	_, err := store.FindOne(ctx, bookID)
-
-	// Assert the expected output
-	require.Error(t, err)
-
-	// Assert that the mockDynamoDB's expectations were met
-	mockDynamoDB.AssertExpectations(t)
-}
-
-func TestDynamoDBStore_FindOneItemNotFound(t *testing.T) {
-	t.Parallel()
-
-	tableName := "test-table"
-
-	// Create a mock instance of the DynamoDB interface
-	mockDynamoDB := ddb.NewMockDynamodbAPI(t)
-
-	// Create a new store using the mock DynamoDB instance
-	store := ddb.NewStore(tableName, mockDynamoDB)
-
-	// Set up the expected inputs and outputs
-	ctx := context.Background()
-	bookID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812")
-	keyItem := map[string]types.AttributeValue{
-		"id": &types.AttributeValueMemberS{Value: bookID.String()},
-	}
-	expectedGetItemInput := &dynamodb.GetItemInput{
-		Key:       keyItem,
-		TableName: aws.String(tableName),
-	}
-
-	// Expect a call to GetItem with the expected input and return the mock output
-	mockDynamoDB.EXPECT().GetItem(ctx, expectedGetItemInput).Return(&dynamodb.GetItemOutput{Item: map[string]types.AttributeValue{}}, nil).Once()
-
-	// Call the FindOne method of the store
-	_, err := store.FindOne(ctx, bookID)
-
-	// Assert the expected output
-	require.Error(t, err)
-
-	// Assert that the mockDynamoDB's expectations were met
-	mockDynamoDB.AssertExpectations(t)
-}
-
-func TestDynamoDBStore_Delete(t *testing.T) {
-	t.Parallel()
-
-	tableName := "test-table"
-
-	// Create a mock instance of the DynamoDB interface
-	mockDynamoDB := ddb.NewMockDynamodbAPI(t)
-
-	// Create a new store using the mock DynamoDB instance
-	store := ddb.NewStore(tableName, mockDynamoDB)
-
-	// Set up the expected inputs and outputs
-	ctx := context.Background()
-	bookID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812")
-	keyItem := map[string]types.AttributeValue{
-		"id": &types.AttributeValueMemberS{Value: bookID.String()},
-	}
-
 	expectedDeleteInput := &dynamodb.DeleteItemInput{
-		Key:                 keyItem,
-		TableName:           aws.String(tableName),
+		Key:                 expectedKey,
+		TableName:           aws.String(table),
 		ConditionExpression: aws.String("attribute_exists(id)"),
 	}
-
-	// Expect a call to DeleteItem with the expected input and return no error
-	mockDynamoDB.EXPECT().DeleteItem(ctx, expectedDeleteInput).Return(nil, nil).Once()
-
-	// Call the Delete method of the store
-	err := store.Delete(ctx, bookID)
-
-	// Assert the expected output
-	require.NoError(t, err)
-
-	// Assert that the mockDynamoDB's expectations were met
-	mockDynamoDB.AssertExpectations(t)
-}
-
-func TestDynamoDBStore_DeleteFail(t *testing.T) {
-	t.Parallel()
-
-	tableName := "test-table"
-
-	// Create a mock instance of the DynamoDB interface
-	mockDynamoDB := ddb.NewMockDynamodbAPI(t)
-
-	// Create a new store using the mock DynamoDB instance
-	store := ddb.NewStore(tableName, mockDynamoDB)
-
-	// Set up the expected inputs and outputs
-	ctx := context.Background()
-	bookID := uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812")
-	keyItem := map[string]types.AttributeValue{
-		"id": &types.AttributeValueMemberS{Value: bookID.String()},
-	}
-
-	expectedDeleteInput := &dynamodb.DeleteItemInput{
-		Key:                 keyItem,
-		TableName:           aws.String(tableName),
-		ConditionExpression: aws.String("attribute_exists(id)"),
-	}
-
-	// Expect a call to DeleteItem with the expected input and return no error
-	mockDynamoDB.EXPECT().DeleteItem(ctx, expectedDeleteInput).Return(&dynamodb.DeleteItemOutput{}, assert.AnError).Once()
-
-	// Call the Delete method of the store
-	err := store.Delete(ctx, bookID)
-
-	// Assert the expected output
-	require.Error(t, err)
-
-	// Assert that the mockDynamoDB's expectations were met
-	mockDynamoDB.AssertExpectations(t)
-}
-
-func TestDynamoDBStore_FindAll(t *testing.T) {
-	t.Parallel()
-
-	tableName := "test-table"
-
-	// Create a mock instance of the DynamoDB interface
-	mockDynamoDB := ddb.NewMockDynamodbAPI(t)
-
-	// Create a new store using the mock DynamoDB instance
-	store := ddb.NewStore(tableName, mockDynamoDB)
-
-	// Set up the expected inputs and outputs
-	ctx := context.Background()
 	expectedScanInput := dynamodb.ScanInput{
-		TableName: aws.String(tableName),
+		TableName: aws.String(table),
 		Limit:     aws.Int32(ddb.DefaultTableScanLimit),
 	}
 
-	expectedScanOutput := &dynamodb.ScanOutput{
-		Items: []map[string]types.AttributeValue{
-			{
-				"id": &types.AttributeValueMemberS{Value: "ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812"},
+	t.Run("Save", func(t *testing.T) {
+		saveBookItem, err := attributevalue.MarshalMap(ddb.ToDynamodbBook(expectedBook))
+		require.NoError(t, err)
+		expectedPutItemInput.Item = saveBookItem
+		client.EXPECT().PutItem(ctx, expectedPutItemInput).Return(nil, nil).Once()
+		err = store.Save(ctx, expectedBook)
+		require.NoError(t, err)
+		client.AssertExpectations(t)
+	})
+
+	t.Run("SaveFail", func(t *testing.T) {
+		saveBookItem, err := attributevalue.MarshalMap(ddb.ToDynamodbBook(expectedBook))
+		require.NoError(t, err)
+		expectedPutItemInput.Item = saveBookItem
+		client.EXPECT().PutItem(ctx, expectedPutItemInput).Return(&dynamodb.PutItemOutput{}, assert.AnError).Once()
+		err = store.Save(ctx, expectedBook)
+		require.Error(t, err)
+		client.AssertExpectations(t)
+	})
+
+	t.Run("FindAll", func(t *testing.T) {
+		expectedScanOutput := &dynamodb.ScanOutput{
+			Items: []map[string]types.AttributeValue{
+				{
+					"id": &types.AttributeValueMemberS{Value: bookID.String()},
+				},
 			},
-		},
-	}
+		}
+		expectedBooks := []domain.Book{
+			{
+				ID: uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812"),
+			},
+		}
+		client.EXPECT().Scan(ctx, &expectedScanInput).Return(expectedScanOutput, nil).Once()
+		books, err := store.FindAll(ctx)
+		require.NoError(t, err)
+		require.Equal(t, expectedBooks, books)
+		client.AssertExpectations(t)
+	})
 
-	expectedBooks := []domain.Book{
-		{
-			ID: uuid.MustParse("ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812"),
-		},
-	}
+	t.Run("FindAllFail", func(t *testing.T) {
+		client.EXPECT().Scan(ctx, &expectedScanInput).Return(&dynamodb.ScanOutput{}, assert.AnError).Once()
+		_, err := store.FindAll(ctx)
+		require.Error(t, err)
+		client.AssertExpectations(t)
+	})
 
-	// Expect a call to Scan with the expected input and return the mock output
-	mockDynamoDB.EXPECT().Scan(ctx, &expectedScanInput).Return(expectedScanOutput, nil).Once()
+	t.Run("FindOne", func(t *testing.T) {
+		getItemOutput, err := attributevalue.MarshalMap(ddb.ToDynamodbBook(expectedBook))
+		require.NoError(t, err)
+		client.EXPECT().GetItem(ctx, expectedGetItemInput).Return(
+			&dynamodb.GetItemOutput{
+				Item: getItemOutput,
+			},
+			nil,
+		).Once()
+		foundBook, err := store.FindOne(ctx, bookID)
+		require.NoError(t, err)
+		assert.Equal(t, expectedBook, foundBook)
+		client.AssertExpectations(t)
+	})
 
-	// Call the FindAll method of the store
-	books, err := store.FindAll(ctx)
+	t.Run("FindOneFail", func(t *testing.T) {
+		client.EXPECT().GetItem(ctx, expectedGetItemInput).Return(&dynamodb.GetItemOutput{}, assert.AnError).Once()
+		_, err := store.FindOne(ctx, bookID)
+		require.Error(t, err)
+		client.AssertExpectations(t)
+	})
 
-	// Assert the expected output
-	require.NoError(t, err)
-	require.Equal(t, expectedBooks, books)
+	t.Run("FindOneItemNotFound", func(t *testing.T) {
+		client.EXPECT().GetItem(ctx, expectedGetItemInput).Return(&dynamodb.GetItemOutput{Item: map[string]types.AttributeValue{}}, nil).Once()
+		_, err := store.FindOne(ctx, bookID)
+		require.Error(t, err)
+		client.AssertExpectations(t)
+	})
 
-	// Assert that the mockDynamoDB's expectations were met
-	mockDynamoDB.AssertExpectations(t)
-}
-
-func TestDynamoDBStore_FindAllFail(t *testing.T) {
-	t.Parallel()
-
-	tableName := "test-table"
-
-	// Create a mock instance of the DynamoDB interface
-	mockDynamoDB := ddb.NewMockDynamodbAPI(t)
-
-	// Create a new store using the mock DynamoDB instance
-	store := ddb.NewStore(tableName, mockDynamoDB)
-
-	// Set up the expected inputs and outputs
-	ctx := context.Background()
-	expectedScanInput := dynamodb.ScanInput{
-		TableName: aws.String(tableName),
-		Limit:     aws.Int32(ddb.DefaultTableScanLimit),
-	}
-
-	// Expect a call to Scan with the expected input and return the mock output
-	mockDynamoDB.EXPECT().Scan(ctx, &expectedScanInput).Return(&dynamodb.ScanOutput{}, assert.AnError).Once()
-
-	// Call the FindAll method of the store
-	_, err := store.FindAll(ctx)
-
-	// Assert the expected output
-	require.Error(t, err)
-
-	// Assert that the mockDynamoDB's expectations were met
-	mockDynamoDB.AssertExpectations(t)
+	t.Run("Delete", func(t *testing.T) {
+		client.EXPECT().DeleteItem(ctx, expectedDeleteInput).Return(nil, nil).Once()
+		err := store.Delete(ctx, bookID)
+		require.NoError(t, err)
+		client.AssertExpectations(t)
+	})
+	t.Run("DeleteFail", func(t *testing.T) {
+		client.EXPECT().DeleteItem(ctx, expectedDeleteInput).Return(&dynamodb.DeleteItemOutput{}, assert.AnError).Once()
+		err := store.Delete(ctx, bookID)
+		require.Error(t, err)
+		client.AssertExpectations(t)
+	})
 }
