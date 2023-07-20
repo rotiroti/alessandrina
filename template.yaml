@@ -21,6 +21,14 @@ Conditions:
 Resources:
   BooksAPI:
     Type: AWS::Serverless::HttpApi
+    Properties:
+      AccessLogSettings:
+        DestinationArn: !GetAtt AccessLogGroup.Arn
+
+  AccessLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/apigateway/${AWS::StackName}/access_log"
 
   BooksTable:
     Type: AWS::Serverless::SimpleTable
