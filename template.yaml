@@ -87,9 +87,6 @@ Resources:
       CodeUri: .
       Handler: create-book
       Description: Create a new book
-      Environment:
-        Variables:
-          STORAGE_MEMORY: false
       Events:
         ApiEvent:
           Type: HttpApi
