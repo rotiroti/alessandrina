@@ -167,105 +167,7 @@ Resources:
           "widgets": [
             {
               "height": 6,
-              "width": 6,
-              "y": 6,
-              "x": 0,
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  ["AWS/Lambda", "Invocations", "FunctionName", "${GetBooksFunction}"],
-                  [".", "Errors", ".", "."],
-                  [".", "Throttles", ".", "."],
-                  [".", "Duration", ".", ".", { "stat": "Average" }],
-                  [".", "ConcurrentExecutions", ".", ".", { "stat": "Maximum" }]
-                ],
-                "view": "timeSeries",
-                "region": "${AWS::Region}",
-                "stacked": false,
-                "title": "Users Lambda",
-                "period": 60,
-                "stat": "Sum"
-              }
-            },
-            {
-              "height": 6,
-              "width": 6,
-              "y": 6,
-              "x": 0,
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  ["AWS/Lambda", "Invocations", "FunctionName", "${GetBookFunction}"],
-                  [".", "Errors", ".", "."],
-                  [".", "Throttles", ".", "."],
-                  [".", "Duration", ".", ".", { "stat": "Average" }],
-                  [".", "ConcurrentExecutions", ".", ".", { "stat": "Maximum" }]
-                ],
-                "view": "timeSeries",
-                "region": "${AWS::Region}",
-                "stacked": false,
-                "title": "Users Lambda",
-                "period": 60,
-                "stat": "Sum"
-              }
-            },
-            {
-              "height": 6,
-              "width": 6,
-              "y": 6,
-              "x": 0,
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [
-                    "AWS/Lambda",
-                    "Invocations",
-                    "FunctionName",
-                    "${CreateBookFunction}"
-                  ],
-                  [".", "Errors", ".", "."],
-                  [".", "Throttles", ".", "."],
-                  [".", "Duration", ".", ".", { "stat": "Average" }],
-                  [".", "ConcurrentExecutions", ".", ".", { "stat": "Maximum" }]
-                ],
-                "view": "timeSeries",
-                "region": "${AWS::Region}",
-                "stacked": false,
-                "title": "Users Lambda",
-                "period": 60,
-                "stat": "Sum"
-              }
-            },
-            {
-              "height": 6,
-              "width": 6,
-              "y": 6,
-              "x": 6,
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [
-                    "AWS/Lambda",
-                    "Invocations",
-                    "FunctionName",
-                    "${DeleteBookFunction}"
-                  ],
-                  [".", "Errors", ".", "."],
-                  [".", "Throttles", ".", "."],
-                  [".", "Duration", ".", ".", { "stat": "Average" }],
-                  [".", "ConcurrentExecutions", ".", ".", { "stat": "Maximum" }]
-                ],
-                "view": "timeSeries",
-                "region": "${AWS::Region}",
-                "stacked": false,
-                "title": "Authorizer Lambda",
-                "period": 60,
-                "stat": "Sum"
-              }
-            },
-            {
-              "height": 6,
-              "width": 12,
+              "width": 24,
               "y": 0,
               "x": 0,
               "type": "metric",
@@ -290,6 +192,104 @@ Resources:
                 "period": 60,
                 "stat": "Sum",
                 "title": "API Gateway"
+              }
+            },
+            {
+              "height": 6,
+              "width": 12,
+              "y": 6,
+              "x": 0,
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  ["AWS/Lambda", "Invocations", "FunctionName", "${GetBooksFunction}"],
+                  [".", "Errors", ".", "."],
+                  [".", "Throttles", ".", "."],
+                  [".", "Duration", ".", ".", { "stat": "Average" }],
+                  [".", "ConcurrentExecutions", ".", ".", { "stat": "Maximum" }]
+                ],
+                "view": "timeSeries",
+                "region": "${AWS::Region}",
+                "stacked": false,
+                "title": "GetBooks Lambda",
+                "period": 60,
+                "stat": "Sum"
+              }
+            },
+            {
+              "height": 6,
+              "width": 12,
+              "y": 6,
+              "x": 12,
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  ["AWS/Lambda", "Invocations", "FunctionName", "${GetBookFunction}"],
+                  [".", "Errors", ".", "."],
+                  [".", "Throttles", ".", "."],
+                  [".", "Duration", ".", ".", { "stat": "Average" }],
+                  [".", "ConcurrentExecutions", ".", ".", { "stat": "Maximum" }]
+                ],
+                "view": "timeSeries",
+                "region": "${AWS::Region}",
+                "stacked": false,
+                "title": "GetBook Lambda",
+                "period": 60,
+                "stat": "Sum"
+              }
+            },
+            {
+              "height": 6,
+              "width": 12,
+              "y": 12,
+              "x": 0,
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  [
+                    "AWS/Lambda",
+                    "Invocations",
+                    "FunctionName",
+                    "${CreateBookFunction}"
+                  ],
+                  [".", "Errors", ".", "."],
+                  [".", "Throttles", ".", "."],
+                  [".", "Duration", ".", ".", { "stat": "Average" }],
+                  [".", "ConcurrentExecutions", ".", ".", { "stat": "Maximum" }]
+                ],
+                "view": "timeSeries",
+                "region": "${AWS::Region}",
+                "stacked": false,
+                "title": "CreateBook Lambda",
+                "period": 60,
+                "stat": "Sum"
+              }
+            },
+            {
+              "height": 6,
+              "width": 12,
+              "y": 12,
+              "x": 12,
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  [
+                    "AWS/Lambda",
+                    "Invocations",
+                    "FunctionName",
+                    "${DeleteBookFunction}"
+                  ],
+                  [".", "Errors", ".", "."],
+                  [".", "Throttles", ".", "."],
+                  [".", "Duration", ".", ".", { "stat": "Average" }],
+                  [".", "ConcurrentExecutions", ".", ".", { "stat": "Maximum" }]
+                ],
+                "view": "timeSeries",
+                "region": "${AWS::Region}",
+                "stacked": false,
+                "title": "DeleteBook Lambda",
+                "period": 60,
+                "stat": "Sum"
               }
             }
           ]
