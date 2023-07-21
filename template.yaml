@@ -24,7 +24,7 @@ Resources:
     Properties:
       AccessLogSettings:
         DestinationArn: !GetAtt AccessLogGroup.Arn
-        Format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":$context.status,"responseLatency":$context.responseLatency}'
+        Format: '{"requestTime":"$context.requestTime","requestId":"$context.requestId","httpMethod":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey","status":$context.status,"responseLatency":$context.responseLatency,"integrationRequestId":"$context.integration.requestId","functionResponseStatus":"$context.integration.status","integrationLatency":"$context.integration.latency","ip":"$context.identity.sourceIp"}'
 
   AccessLogGroup:
     Type: AWS::Logs::LogGroup
@@ -158,10 +158,151 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${DeleteBookFunction}"
       RetentionInDays: 7
 
+  ApplicationDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Sub "${AWS::StackName}-dashboard"
+      DashboardBody: !Sub >
+        {
+          "widgets": [
+            {
+              "height": 6,
+              "width": 6,
+              "y": 6,
+              "x": 0,
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  ["AWS/Lambda", "Invocations", "FunctionName", "${GetBooksFunction}"],
+                  [".", "Errors", ".", "."],
+                  [".", "Throttles", ".", "."],
+                  [".", "Duration", ".", ".", { "stat": "Average" }],
+                  [".", "ConcurrentExecutions", ".", ".", { "stat": "Maximum" }]
+                ],
+                "view": "timeSeries",
+                "region": "${AWS::Region}",
+                "stacked": false,
+                "title": "Users Lambda",
+                "period": 60,
+                "stat": "Sum"
+              }
+            },
+            {
+              "height": 6,
+              "width": 6,
+              "y": 6,
+              "x": 0,
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  ["AWS/Lambda", "Invocations", "FunctionName", "${GetBookFunction}"],
+                  [".", "Errors", ".", "."],
+                  [".", "Throttles", ".", "."],
+                  [".", "Duration", ".", ".", { "stat": "Average" }],
+                  [".", "ConcurrentExecutions", ".", ".", { "stat": "Maximum" }]
+                ],
+                "view": "timeSeries",
+                "region": "${AWS::Region}",
+                "stacked": false,
+                "title": "Users Lambda",
+                "period": 60,
+                "stat": "Sum"
+              }
+            },
+            {
+              "height": 6,
+              "width": 6,
+              "y": 6,
+              "x": 0,
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  [
+                    "AWS/Lambda",
+                    "Invocations",
+                    "FunctionName",
+                    "${CreateBookFunction}"
+                  ],
+                  [".", "Errors", ".", "."],
+                  [".", "Throttles", ".", "."],
+                  [".", "Duration", ".", ".", { "stat": "Average" }],
+                  [".", "ConcurrentExecutions", ".", ".", { "stat": "Maximum" }]
+                ],
+                "view": "timeSeries",
+                "region": "${AWS::Region}",
+                "stacked": false,
+                "title": "Users Lambda",
+                "period": 60,
+                "stat": "Sum"
+              }
+            },
+            {
+              "height": 6,
+              "width": 6,
+              "y": 6,
+              "x": 6,
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  [
+                    "AWS/Lambda",
+                    "Invocations",
+                    "FunctionName",
+                    "${DeleteBookFunction}"
+                  ],
+                  [".", "Errors", ".", "."],
+                  [".", "Throttles", ".", "."],
+                  [".", "Duration", ".", ".", { "stat": "Average" }],
+                  [".", "ConcurrentExecutions", ".", ".", { "stat": "Maximum" }]
+                ],
+                "view": "timeSeries",
+                "region": "${AWS::Region}",
+                "stacked": false,
+                "title": "Authorizer Lambda",
+                "period": 60,
+                "stat": "Sum"
+              }
+            },
+            {
+              "height": 6,
+              "width": 12,
+              "y": 0,
+              "x": 0,
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  [
+                    "AWS/ApiGateway",
+                    "4XXError",
+                    "ApiName",
+                    "${AWS::StackName}",
+                    { "yAxis": "right" }
+                  ],
+                  [".", "5XXError", ".", ".", { "yAxis": "right" }],
+                  [".", "DataProcessed", ".", ".", { "yAxis": "left" }],
+                  [".", "Count", ".", ".", { "label": "Count", "yAxis": "right" }],
+                  [".", "IntegrationLatency", ".", ".", { "stat": "Average" }],
+                  [".", "Latency", ".", ".", { "stat": "Average" }]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${AWS::Region}",
+                "period": 60,
+                "stat": "Sum",
+                "title": "API Gateway"
+              }
+            }
+          ]
+        }
+
 Outputs:
   WebEndpoint:
     Description: "API Gateway endpoint URL for the Books API"
     Value: !Sub "https://${BooksAPI}.execute-api.${AWS::Region}.amazonaws.com/"
+
+  DashboardURL:
+    Description: "Dashboard URL"
+    Value: !Sub "https://console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards:name=${ApplicationDashboard}"
 
   GetBooksFunction:
     Description: "GetBooks Lambda Function ARN"
