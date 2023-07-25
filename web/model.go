@@ -26,11 +26,11 @@ func ToAppBook(book domain.Book) AppBook {
 
 // AppNewBook is the new book model used by the API.
 type AppNewBook struct {
-	Title     string `json:"title"`
-	Authors   string `json:"authors"`
-	Publisher string `json:"publisher"`
-	Pages     int    `json:"pages"`
-	ISBN      string `json:"isbn"`
+	Title     string `json:"title" validate:"required"`
+	Authors   string `json:"authors" validate:"required"`
+	Publisher string `json:"publisher" validate:"required"`
+	Pages     int    `json:"pages" validate:"required,min=1"`
+	ISBN      string `json:"isbn" validate:"required,isbn"`
 }
 
 // ToDomainNewBook converts an AppNewBook to a domain.NewBook.

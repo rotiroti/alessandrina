@@ -8,17 +8,20 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/google/uuid"
 	"github.com/rotiroti/alessandrina/domain"
+	"github.com/rotiroti/alessandrina/sys/validation"
 )
 
 // APIGatewayV2Handler is the handler for the API Gateway v2.
 type APIGatewayV2Handler struct {
-	book *domain.BookCore
+	book      *domain.BookCore
+	validator validation.Validator
 }
 
 // NewAPIGatewayV2Handler returns a new APIGatewayV2Handler.
 func NewAPIGatewayV2Handler(book *domain.BookCore) *APIGatewayV2Handler {
 	return &APIGatewayV2Handler{
-		book: book,
+		book:      book,
+		validator: validation.New(),
 	}
 }
 
@@ -27,6 +30,10 @@ func (h *APIGatewayV2Handler) CreateBook(ctx context.Context, req events.APIGate
 	var appNewBook AppNewBook
 
 	if err := json.Unmarshal([]byte(req.Body), &appNewBook); err != nil {
+		return errorResponse(http.StatusBadRequest, err.Error()), nil
+	}
+
+	if err := h.validator.Check(appNewBook); err != nil {
 		return errorResponse(http.StatusBadRequest, err.Error()), nil
 	}
 
