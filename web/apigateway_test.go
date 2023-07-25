@@ -73,6 +73,17 @@ func TestBadRequest(t *testing.T) {
 	}
 }
 
+func TestCreateBookInvalidPayload(t *testing.T) {
+	ctx := context.Background()
+	handler := web.NewAPIGatewayV2Handler(nil)
+	ret, err := handler.CreateBook(ctx, events.APIGatewayV2HTTPRequest{
+		Body: "{}",
+	})
+
+	require.NoError(t, err)
+	require.Equal(t, http.StatusBadRequest, ret.StatusCode)
+}
+
 func TestHandler(t *testing.T) {
 	ctx := context.Background()
 	expectedID, generator := setup(t)
