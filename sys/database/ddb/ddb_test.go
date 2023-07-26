@@ -50,6 +50,34 @@ func TestNewStore(t *testing.T) {
 		require.NotNil(t, store)
 	})
 }
+
+func TestNewDebugStore(t *testing.T) {
+	ctx := context.Background()
+	t.Run("EmptyTableName", func(t *testing.T) {
+		store, err := ddb.NewDebugStore(ctx, "")
+
+		require.Error(t, err)
+		require.Nil(t, store)
+	})
+
+	t.Run("InvalidDefaultAWSConfig", func(t *testing.T) {
+		os.Setenv("AWS_ENABLE_ENDPOINT_DISCOVERY", "foo-bar")
+		store, err := ddb.NewDebugStore(ctx, "test-table")
+
+		require.Error(t, err)
+		require.Nil(t, store)
+
+		os.Unsetenv("AWS_ENABLE_ENDPOINT_DISCOVERY")
+	})
+
+	t.Run("OK", func(t *testing.T) {
+		store, err := ddb.NewDebugStore(ctx, "test-table")
+
+		require.NoError(t, err)
+		require.NotNil(t, store)
+	})
+}
+
 func TestStore(t *testing.T) {
 	ctx := context.Background()
 	expectedTable := "test-table"

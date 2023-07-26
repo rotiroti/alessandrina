@@ -86,14 +86,11 @@ This folder contains shell scripts to perform migrations when running DynamoDB o
 The serverless application can be configured via some environment variables.
 
 ```shell
-# Set the table name (required when using DynamoDB storage)
+# Set the table name (mandatory)
 TABLE_NAME=BooksTable-local
 
-# Set a custom endpoint to be used for a service (i.e. Localstack)
-AWS_ENDPOINT_DEBUG="http://localstack_main:4566"
-
-# Enable debug logging for AWS SDK Go clients to view HTTP requests and response bodies.
-AWS_CLIENT_DEBUG=false
+# Use a local DynamoDB storage (optional, require Localstack)
+DEBUG_MODE=true
 ```
 
 ## Makefile Commands
@@ -147,10 +144,7 @@ sam build --parallel
 sam local start-api --docker-network alessandrina --warm-containers LAZY --env-vars locals.json
 
 # 6. Open another shell and execute the command in the project's root directory.
-make integration-tests \
-   LOCALSTACK=true \
-   TABLE_NAME=BooksTable-local \
-   AWS_ENDPOINT=http://localstack_main:4566
+make integration-tests
 ```
 
 ### Deployed Environment (feature,dev or prod)
