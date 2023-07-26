@@ -19,13 +19,7 @@ func main() {
 }
 
 func run(ctx context.Context) error {
-	DB := ddb.Config{
-		TableName: os.Getenv("TABLE_NAME"),
-		Endpoint:  os.Getenv("AWS_ENDPOINT_DEBUG"),
-		ClientLog: os.Getenv("AWS_CLIENT_DEBUG"),
-	}
-
-	store, err := ddb.NewStore(ctx, DB)
+	store, err := ddb.NewStore(ctx, os.Getenv("TABLE_NAME"))
 	if err != nil {
 		return err
 	}
