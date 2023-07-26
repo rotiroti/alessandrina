@@ -1,4 +1,14 @@
-inpackage: True
-testonly: True
 with-expecter: True
-case: underscore
+all: False
+filename: "mock_{{.InterfaceName}}_test.go"
+dir: "{{.InterfaceDir}}"
+mockname: "Mock{{.InterfaceName}}"
+outpkg: "{{.PackageName}}"
+inpackage: True
+packages:
+  github.com/rotiroti/alessandrina/domain:
+    interfaces:
+      Storer:
+  github.com/rotiroti/alessandrina/sys/database/ddb:
+    interfaces:
+      DynamoDBClient:
