@@ -75,6 +75,37 @@ func NewStore(ctx context.Context, table string, opts ...Option) (*Store, error)
 	return store, nil
 }
 
+func NewDebugStore(ctx context.Context, table string) (*Store, error) {
+	if table == "" {
+		return nil, fmt.Errorf("newstore: %w", ErrMissingTableName)
+	}
+
+	options := []func(*config.LoadOptions) error{}
+	resolver := aws.EndpointResolverWithOptionsFunc(
+		func(_, region string, options ...interface{}) (aws.Endpoint, error) {
+			return aws.Endpoint{
+				PartitionID:   "aws",
+				URL:           "http://localstack_main:4566",
+				SigningRegion: region,
+			}, nil
+		})
+	logMode := aws.LogRequestWithBody | aws.LogResponseWithBody
+	options = append(options,
+		config.WithEndpointResolverWithOptions(resolver),
+		config.WithClientLogMode(logMode),
+	)
+
+	conf, err := config.LoadDefaultConfig(ctx, options...)
+	if err != nil {
+		return nil, fmt.Errorf("debugstore: loaddefaultconfig: %w", err)
+	}
+
+	client := dynamodb.NewFromConfig(conf)
+	store := &Store{table: table, client: client}
+
+	return store, nil
+}
+
 // Save adds a new book into the DynamoDB database.
 func (s *Store) Save(ctx context.Context, book domain.Book) error {
 	item, err := attributevalue.MarshalMap(ToDynamodbBook(book))

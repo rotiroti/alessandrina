@@ -19,7 +19,21 @@ func main() {
 }
 
 func run(ctx context.Context) error {
-	store, err := ddb.NewStore(ctx, os.Getenv("TABLE_NAME"))
+	var (
+		store *ddb.Store
+		err   error
+	)
+
+	tableName := os.Getenv("TABLE_NAME")
+	debugMode := os.Getenv("DEBUG_MODE")
+
+	switch debugMode {
+	case "true":
+		store, err = ddb.NewDebugStore(ctx, tableName)
+	default:
+		store, err = ddb.NewStore(ctx, tableName)
+	}
+
 	if err != nil {
 		return err
 	}

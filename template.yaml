@@ -9,8 +9,7 @@ Globals:
     Environment:
       Variables:
         TABLE_NAME: !Ref BooksTable
-        AWS_ENDPOINT_DEBUG: ""
-        AWS_CLIENT_DEBUG: false
+        DEBUG_MODE: false
     AutoPublishAlias: live
     DeploymentPreference:
       Type: !If [IsProduction, "Canary10Percent5Minutes", "AllAtOnce"]

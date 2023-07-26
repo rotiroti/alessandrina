@@ -110,54 +110,54 @@ func TestIntegrationFlow(t *testing.T) {
 		t.Errorf("Invalid ID format. Expected a valid UUIDv4 but got %q", bookID)
 	}
 
-	// // --- GetBook scenario ---
-	// bookURL := fmt.Sprintf("%s/%s", baseURL, bookID)
-	// req, err = http.NewRequest(http.MethodGet, bookURL, nil)
-	// if err != nil {
-	// 	t.Fatalf("Failed to create request: %v", err)
-	// }
+	// --- GetBook scenario ---
+	bookURL := fmt.Sprintf("%s/%s", baseURL, bookID)
+	req, err = http.NewRequest(http.MethodGet, bookURL, nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
 
-	// resp, err = client.Do(req)
-	// if err != nil {
-	// 	t.Fatalf("Request failed: %v", err)
-	// }
-	// defer resp.Body.Close()
+	resp, err = client.Do(req)
+	if err != nil {
+		t.Fatalf("Request failed: %v", err)
+	}
+	defer resp.Body.Close()
 
-	// // Check the response status code to be 200
-	// if resp.StatusCode != http.StatusOK {
-	// 	t.Fatalf("Expected status code %d but got %d", http.StatusOK, resp.StatusCode)
-	// }
+	// Check the response status code to be 200
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("Expected status code %d but got %d", http.StatusOK, resp.StatusCode)
+	}
 
-	// // --- GetBooks scenario ---
-	// req, err = http.NewRequest(http.MethodGet, baseURL, nil)
-	// if err != nil {
-	// 	t.Fatalf("Failed to create request: %v", err)
-	// }
+	// --- GetBooks scenario ---
+	req, err = http.NewRequest(http.MethodGet, baseURL, nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
 
-	// resp, err = client.Do(req)
-	// if err != nil {
-	// 	t.Fatalf("Request failed: %v", err)
-	// }
+	resp, err = client.Do(req)
+	if err != nil {
+		t.Fatalf("Request failed: %v", err)
+	}
 
-	// // Check the response status code to be 200
-	// if resp.StatusCode != http.StatusOK {
-	// 	t.Fatalf("Expected status code %d but got %d", http.StatusOK, resp.StatusCode)
-	// }
+	// Check the response status code to be 200
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("Expected status code %d but got %d", http.StatusOK, resp.StatusCode)
+	}
 
-	// // --- DeleteBook scenario ---
-	// req, err = http.NewRequest(http.MethodDelete, bookURL, nil)
-	// if err != nil {
-	// 	t.Fatalf("Failed to create request: %v", err)
-	// }
+	// --- DeleteBook scenario ---
+	req, err = http.NewRequest(http.MethodDelete, bookURL, nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
 
-	// resp, err = client.Do(req)
-	// if err != nil {
-	// 	t.Fatalf("Request failed: %v", err)
-	// }
-	// defer resp.Body.Close()
+	resp, err = client.Do(req)
+	if err != nil {
+		t.Fatalf("Request failed: %v", err)
+	}
+	defer resp.Body.Close()
 
-	// // Check the response status code to be 204
-	// if resp.StatusCode != http.StatusNoContent {
-	// 	t.Fatalf("Expected status code %d but got %d", http.StatusNoContent, resp.StatusCode)
-	// }
+	// Check the response status code to be 204
+	if resp.StatusCode != http.StatusNoContent {
+		t.Fatalf("Expected status code %d but got %d", http.StatusNoContent, resp.StatusCode)
+	}
 }
