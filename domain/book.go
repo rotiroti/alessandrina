@@ -20,8 +20,6 @@ var (
 type UUIDGenerator func() uuid.UUID
 
 // Storer is the interface used to interact with a storage.
-//
-//go:generate mockery --name Storer
 type Storer interface {
 	Save(ctx context.Context, book Book) error
 	FindAll(ctx context.Context) ([]Book, error)

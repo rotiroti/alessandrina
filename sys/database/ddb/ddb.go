@@ -33,8 +33,6 @@ func WithClient(client DynamoDBClient) Option {
 }
 
 // DynamoDBClient is the interface used to interact with AWS DynamoDB.
-//
-//go:generate mockery --name DynamoDBClient
 type DynamoDBClient interface {
 	Scan(ctx context.Context, params *dynamodb.ScanInput, optFns ...func(*dynamodb.Options)) (*dynamodb.ScanOutput, error)
 	PutItem(ctx context.Context, params *dynamodb.PutItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error)
