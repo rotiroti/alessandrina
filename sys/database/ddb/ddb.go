@@ -22,102 +22,73 @@ var ErrMissingTableName = errors.New("missing TABLE_NAME environment variable")
 // NOTE: This is a temporary solution to avoid scanning the entire table.
 const DefaultTableScanLimit = 25
 
-// DynamodbAPI is the interface used to interact with AWS DynamoDB.
+// Option is a function that configures a Store.
+type Option func(*Store)
+
+// WithClient returns a Store Option that sets the DynamoDB client.
+func WithClient(client DynamoDBClient) Option {
+	return func(s *Store) {
+		s.client = client
+	}
+}
+
+// DynamoDBClient is the interface used to interact with AWS DynamoDB.
 //
-//go:generate mockery --name DynamoDB
-type DynamodbAPI interface {
+//go:generate mockery --name DynamoDBClient
+type DynamoDBClient interface {
 	Scan(ctx context.Context, params *dynamodb.ScanInput, optFns ...func(*dynamodb.Options)) (*dynamodb.ScanOutput, error)
 	PutItem(ctx context.Context, params *dynamodb.PutItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error)
 	GetItem(ctx context.Context, params *dynamodb.GetItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.GetItemOutput, error)
 	DeleteItem(ctx context.Context, params *dynamodb.DeleteItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.DeleteItemOutput, error)
 }
 
-// Config is the configuration used to create a new DynamoDB client.
-type Config struct {
-	ClientLog string
-	Endpoint  string
-	TableName string
-}
-
-func parse(ctx context.Context, conf Config) ([]func(*config.LoadOptions) error, error) {
-	options := []func(*config.LoadOptions) error{}
-
-	if conf.TableName == "" {
-		return options, fmt.Errorf("parse: %w", ErrMissingTableName)
-	}
-
-	// Define a custom endpoint resolver to use a local DynamoDB instance.
-	// This is useful for local development, for example with the SAM CLI and LocalStack.
-	resolver := aws.EndpointResolverWithOptionsFunc(
-		func(_, region string, options ...interface{}) (aws.Endpoint, error) {
-			endpoint := conf.Endpoint
-			if endpoint != "" {
-				return aws.Endpoint{
-					PartitionID:   "aws",
-					URL:           endpoint,
-					SigningRegion: region,
-				}, nil
-			}
-
-			return aws.Endpoint{}, &aws.EndpointNotFoundError{}
-		})
-
-	// Enable debug logging to see the HTTP requests and responses bodies.
-	var logMode aws.ClientLogMode
-
-	if conf.ClientLog == "true" {
-		logMode |= aws.LogRequestWithBody | aws.LogResponseWithBody
-	}
-
-	options = append(options,
-		config.WithEndpointResolverWithOptions(resolver),
-		config.WithClientLogMode(logMode),
-	)
-
-	return options, nil
-}
-
 // Store is a DynamoDB implementation of the Storer interface.
 type Store struct {
-	Client DynamodbAPI
-	config Config
+	client DynamoDBClient
+	table  string
 }
 
 // Ensure Store implements the Storer interface.
 var _ domain.Storer = (*Store)(nil)
 
-// NewStore returns a new instance of Store.
-func NewStore(ctx context.Context, conf Config) (*Store, error) {
-	options, err := parse(ctx, conf)
-	if err != nil {
-		return &Store{}, fmt.Errorf("newstore: %w", err)
+// NewStore returns a new DynamoDB Store.
+func NewStore(ctx context.Context, table string, opts ...Option) (*Store, error) {
+	if table == "" {
+		return nil, fmt.Errorf("newstore: %w", ErrMissingTableName)
 	}
 
-	awsConfig, err := config.LoadDefaultConfig(ctx, options...)
-	if err != nil {
-		return &Store{}, fmt.Errorf("newstore: %w", err)
+	store := &Store{table: table}
+
+	for _, opt := range opts {
+		opt(store)
 	}
 
-	return &Store{
-		Client: dynamodb.NewFromConfig(awsConfig),
-		config: conf,
-	}, nil
+	if store.client == nil {
+		cfg, err := config.LoadDefaultConfig(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("newstore: loaddefaultconfig: %w", err)
+		}
+
+		store.client = dynamodb.NewFromConfig(cfg)
+	}
+
+	return store, nil
 }
 
 // Save adds a new book into the DynamoDB database.
 func (s *Store) Save(ctx context.Context, book domain.Book) error {
 	item, err := attributevalue.MarshalMap(ToDynamodbBook(book))
 	if err != nil {
-		return fmt.Errorf("marshalmap: %w", err)
+		return fmt.Errorf("save: marshalmap: %w", err)
 	}
 
-	_, err = s.Client.PutItem(ctx, &dynamodb.PutItemInput{
+	_, err = s.client.PutItem(ctx, &dynamodb.PutItemInput{
 		Item:      item,
-		TableName: aws.String(s.config.TableName),
+		TableName: aws.String(s.table),
 	})
 
 	if err != nil {
-		return fmt.Errorf("putitem: %w", err)
+		return fmt.Errorf("save: putitem: %w", err)
 	}
 
 	return nil
@@ -125,8 +96,8 @@ func (s *Store) Save(ctx context.Context, book domain.Book) error {
 
 // FindAll returns all books from the DynamoDB database.
 func (s *Store) FindAll(ctx context.Context) ([]domain.Book, error) {
-	response, err := s.Client.Scan(ctx, &dynamodb.ScanInput{
-		TableName: aws.String(s.config.TableName),
+	response, err := s.client.Scan(ctx, &dynamodb.ScanInput{
+		TableName: aws.String(s.table),
 		Limit:     aws.Int32(DefaultTableScanLimit),
 	})
 
@@ -148,8 +119,8 @@ func (s *Store) FindAll(ctx context.Context) ([]domain.Book, error) {
 // FindOne returns a book from the DynamoDB database by using bookID as primary key.
 func (s *Store) FindOne(ctx context.Context, bookID uuid.UUID) (domain.Book, error) {
 	item := DynamodbBook{ID: bookID.String()}
-	response, err := s.Client.GetItem(ctx, &dynamodb.GetItemInput{
-		TableName: aws.String(s.config.TableName),
+	response, err := s.client.GetItem(ctx, &dynamodb.GetItemInput{
+		TableName: aws.String(s.table),
 		Key: map[string]types.AttributeValue{
 			"id": &types.AttributeValueMemberS{Value: item.ID},
 		},
@@ -174,8 +145,8 @@ func (s *Store) FindOne(ctx context.Context, bookID uuid.UUID) (domain.Book, err
 
 // Delete removes a book from the DynamoDB database by using bookID as primary key.
 func (s *Store) Delete(ctx context.Context, bookID uuid.UUID) error {
-	_, err := s.Client.DeleteItem(ctx, &dynamodb.DeleteItemInput{
-		TableName: aws.String(s.config.TableName),
+	_, err := s.client.DeleteItem(ctx, &dynamodb.DeleteItemInput{
+		TableName: aws.String(s.table),
 		Key: map[string]types.AttributeValue{
 			"id": &types.AttributeValueMemberS{Value: bookID.String()},
 		},
