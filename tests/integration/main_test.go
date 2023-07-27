@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
@@ -49,8 +51,6 @@ func setup() string {
 }
 
 func TestIntegrationFlow(t *testing.T) {
-	t.Parallel()
-
 	// Skip the integration test if the INTEGRATION environment variable is not set
 	skipIntegration(t)
 
@@ -159,5 +159,99 @@ func TestIntegrationFlow(t *testing.T) {
 	// Check the response status code to be 204
 	if resp.StatusCode != http.StatusNoContent {
 		t.Fatalf("Expected status code %d but got %d", http.StatusNoContent, resp.StatusCode)
+	}
+}
+
+func TestErrorResponses(t *testing.T) {
+	skipIntegration(t)
+
+	type args struct {
+		method string
+		url    string
+		body   io.Reader
+	}
+
+	client := &http.Client{}
+	baseURL := setup()
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			name: "GetBookInvalidIdFormat",
+			args: args{
+				method: http.MethodGet,
+				url:    fmt.Sprintf("%s/%s", baseURL, "1234"),
+				body:   nil,
+			},
+			want: http.StatusBadRequest,
+		},
+		{
+			name: "GetBookIdNotFound",
+			args: args{
+				method: http.MethodGet,
+				url:    fmt.Sprintf("%s/%s", baseURL, uuid.New().String()),
+				body:   nil,
+			},
+			want: http.StatusInternalServerError,
+		},
+		{
+			name: "CreateBookInvalidPayload",
+			args: args{
+				method: http.MethodPost,
+				url:    baseURL,
+				body:   strings.NewReader("invalid"),
+			},
+			want: http.StatusBadRequest,
+		},
+		{
+			name: "CreateBookFailedValidation",
+			args: args{
+				method: http.MethodPost,
+				url:    baseURL,
+				body:   strings.NewReader(`{"title": ""}`),
+			},
+			want: http.StatusBadRequest,
+		},
+		{
+			name: "DeleteBookInvalidIdFormat",
+			args: args{
+				method: http.MethodDelete,
+				url:    fmt.Sprintf("%s/%s", baseURL, "1234"),
+				body:   nil,
+			},
+			want: http.StatusBadRequest,
+		},
+		{
+			name: "DeleteBookIdNotFound",
+			args: args{
+				method: http.MethodDelete,
+				url:    fmt.Sprintf("%s/%s", baseURL, uuid.New().String()),
+				body:   nil,
+			},
+			want: http.StatusInternalServerError,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, err := http.NewRequest(tt.args.method, tt.args.url, tt.args.body)
+			if err != nil {
+				t.Fatalf("Failed to create request: %v", err)
+			}
+
+			req.Header.Set("Content-Type", "application/json; charset=utf-8")
+			resp, err := client.Do(req)
+			if err != nil {
+				t.Fatalf("Request failed: %v", err)
+			}
+
+			defer resp.Body.Close()
+
+			if resp.StatusCode != tt.want {
+				t.Fatalf("Expected status code %d but got %d", tt.want, resp.StatusCode)
+			}
+		})
 	}
 }
