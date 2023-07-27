@@ -203,7 +203,7 @@ jobs:
         id: deploy
         run: |
           API_URL=$(sam list stack-outputs --stack-name ${DEV_STACK_NAME} --region ${DEV_REGION} --output json | jq -r '.[] | select(.OutputKey=="WebEndpoint")|.OutputValue')
-          echo "API_URL=${API_URL}" >> $GITHUB_OUTPUT
+          echo "API_URL=${API_URL%/}" >> $GITHUB_OUTPUT
 
   integration-tests:
     if: github.ref == 'refs/heads/main'
