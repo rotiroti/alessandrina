@@ -40,14 +40,14 @@ scenarios:
           expect:
             statusCode: 201
             hasProperty: "id"
-          capture:
-            json: "$.id"
-            as: "id"
       - think: 1
       - get:
           url: "/books"
           expect:
             statusCode: 200
+          capture:
+            json: "$.books[0].id"
+            as: "id"
       - think: 1
       - get:
           url: "/books/{{ id }}"
