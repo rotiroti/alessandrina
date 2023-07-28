@@ -86,7 +86,7 @@ const generateRandomData = (context, events, done) => {
     const authors = AUTHORS[Math.floor(Math.random() * AUTHORS.length)];
     const isbn = ISBN[Math.floor(Math.random() * ISBN.length)];
     const publisher = PUBLISHER[Math.floor(Math.random() * PUBLISHER.length)];
-    const pages = Math.floor(Math.random() * 1000);
+    const pages = Math.floor(Math.random() * 1000) + 1;
 
     context.vars.title = title;
     context.vars.authors = authors;
