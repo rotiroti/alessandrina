@@ -12,7 +12,7 @@ Globals:
         DEBUG_MODE: false
     AutoPublishAlias: live
     DeploymentPreference:
-      Type: !If [IsProduction, "Canary10Percent5Minutes", "AllAtOnce"]
+      Type: !If [IsProduction, "Canary10Percent10Minutes", "AllAtOnce"]
 
 Conditions:
   IsProduction: !Equals [!Ref "AWS::StackName", "alessandrina-prod"]
@@ -32,14 +32,15 @@ Resources:
       RetentionInDays: 7
 
   BooksTable:
-    Type: AWS::Serverless::SimpleTable
+    Type: AWS::DynamoDB::Table
     Properties:
-      PrimaryKey:
-        Name: id
-        Type: String
-      ProvisionedThroughput:
-        ReadCapacityUnits: 10
-        WriteCapacityUnits: 10
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
 
   GetBooksFunction:
     Type: AWS::Serverless::Function

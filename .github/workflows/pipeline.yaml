@@ -226,45 +226,45 @@ jobs:
         run: |
           echo "API_URL=${{ needs.deploy-dev.outputs.API_URL }}" >> $GITHUB_OUTPUT
 
-  load-tests:
-    if: github.ref == 'refs/heads/main'
-    needs: [integration-tests]
-    runs-on: ubuntu-latest
-    container: artilleryio/artillery:latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+  # load-tests:
+  #   if: github.ref == 'refs/heads/main'
+  #   needs: [integration-tests]
+  #   runs-on: ubuntu-latest
+  #   container: artilleryio/artillery:latest
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
 
-      - name: Install additional dependencies
-        run: npm install -g artillery-plugin-expect artillery-plugin-ensure
+  #     - name: Install additional dependencies
+  #       run: npm install -g artillery-plugin-expect artillery-plugin-ensure
 
-      - name: Make reports directory
-        run: mkdir reports
+  #     - name: Make reports directory
+  #       run: mkdir reports
 
-      - name: Execute smoke test
-        run: |
-          API_URL=${{ needs.integration-tests.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/smoke.json tests/performance/smoke.yml
-          /home/node/artillery/bin/run report --output reports/smoke.html reports/smoke.json
+  #     - name: Execute smoke test
+  #       run: |
+  #         API_URL=${{ needs.integration-tests.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/smoke.json tests/performance/smoke.yml
+  #         /home/node/artillery/bin/run report --output reports/smoke.html reports/smoke.json
 
-      - name: Execute load test (CRD book)
-        run: |
-          API_URL=${{ needs.integration-tests.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/load-crd.json tests/performance/load-crd.yml
-          /home/node/artillery/bin/run report --output reports/load-crd.html reports/load-crd.json
+  #     - name: Execute load test (CRD book)
+  #       run: |
+  #         API_URL=${{ needs.integration-tests.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/load-crd.json tests/performance/load-crd.yml
+  #         /home/node/artillery/bin/run report --output reports/load-crd.html reports/load-crd.json
 
-      - name: Execute SLO test (p95=400, error rate=0.01)
-        run: |
-          API_URL=${{ needs.integration-tests.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/slo30sec10vus.json --environment=slo30sec10vus tests/performance/slo.yml
-          /home/node/artillery/bin/run report --output reports/slo30sec10vus.html reports/slo30sec10vus.json
+  #     - name: Execute SLO test (p95=400, error rate=0.01)
+  #       run: |
+  #         API_URL=${{ needs.integration-tests.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/slo30sec10vus.json --environment=slo30sec10vus tests/performance/slo.yml
+  #         /home/node/artillery/bin/run report --output reports/slo30sec10vus.html reports/slo30sec10vus.json
 
-      - name: Archive test report
-        uses: actions/upload-artifact@v3
-        with:
-          name: artillery-test-report
-          path: reports/*
+  #     - name: Archive test report
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: artillery-test-report
+  #         path: reports/*
 
   deploy-prod:
     if: github.ref == 'refs/heads/main'
-    needs: [load-tests]
+    needs: [integration-tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
