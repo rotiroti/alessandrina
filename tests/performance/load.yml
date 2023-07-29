@@ -4,9 +4,9 @@ config:
     expect: {}
   target: "{{ $processEnvironment.API_URL }}"
   phases:
-      - name: "Execute 300 requests per second during 5 minutes"
-        duration: 300
-        arrivalRate: 50
+    - name: "Execute 300 requests per second during 5 minutes"
+      duration: 300
+      arrivalRate: 50
   processor: "./generator.js"
   default:
     headers:
