@@ -12,7 +12,7 @@ Globals:
         DEBUG_MODE: false
     AutoPublishAlias: live
     DeploymentPreference:
-      Type: !If [IsProduction, "Canary10Percent10Minutes", "AllAtOnce"]
+      Type: !If [IsProduction, "Canary10Percent5Minutes", "AllAtOnce"]
 
 Conditions:
   IsProduction: !Equals [!Ref "AWS::StackName", "alessandrina-prod"]
