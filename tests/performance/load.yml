@@ -1,0 +1,44 @@
+config:
+  plugins:
+    ensure: {}
+    expect: {}
+  target: "{{ $processEnvironment.API_URL }}"
+  phases:
+      duration: 300
+      arrivalRate: 50
+  processor: "./generator.js"
+  default:
+    headers:
+      Accept: "application/json"
+      Content-Type: "application/json"
+  ensure:
+    p95: 400
+    maxErrorRate: 1
+scenarios:
+  - name: "Create, Read, Delete"
+    flow:
+      - function: "generateRandomData"
+      - post:
+          url: "/books"
+          json:
+            title: "{{ title }}"
+            authors: "{{ authors }}"
+            isbn: "{{ isbn }}"
+            pages: "{{ pages }}"
+            publisher: "{{ publisher }}"
+          expect:
+            statusCode: 201
+            hasProperty: "id"
+          capture:
+            json: "$.id"
+            as: "id"
+      - think: 1
+      - get:
+          url: "/books/{{ id }}"
+          expect:
+            statusCode: 200
+      - think: 1
+      - delete:
+          url: "/books/{{ id }}"
+          expect:
+            statusCode: 204
