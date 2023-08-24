@@ -153,6 +153,6 @@ make integration-tests
 # 1. Build the serverless application
 sam build --parallel
 
-# 2.
+# 2. Run integration tests
 make integration-tests API_URL=<DEPLOYED_STACK_API_URL>
 ```
