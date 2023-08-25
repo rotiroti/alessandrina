@@ -1,18 +1,18 @@
 {
   "GetBooksFunction": {
-    "TABLE_NAME": "BooksTable-local",
-    "DEBUG_MODE": "true"
+    "DB_TABLE": "BooksTable-local",
+    "DB_CONNECTION": "localstack"
   },
   "GetBookFunction": {
-    "TABLE_NAME": "BooksTable-local",
-    "DEBUG_MODE": "true"
+    "DB_TABLE": "BooksTable-local",
+    "DB_CONNECTION": "localstack"
   },
   "CreateBookFunction": {
-    "TABLE_NAME": "BooksTable-local",
-    "DEBUG_MODE": "true"
+    "DB_TABLE": "BooksTable-local",
+    "DB_CONNECTION": "localstack"
   },
   "DeleteBookFunction": {
-    "TABLE_NAME": "BooksTable-local",
-    "DEBUG_MODE": "true"
+    "DB_TABLE": "BooksTable-local",
+    "DB_CONNECTION": "localstack"
   }
 }

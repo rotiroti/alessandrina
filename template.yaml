@@ -8,8 +8,9 @@ Globals:
     Architectures: [x86_64]
     Environment:
       Variables:
-        TABLE_NAME: !Ref BooksTable
-        DEBUG_MODE: false
+        DB_TABLE: !Ref BooksTable
+        DB_CONNECTION: "aws"
+        DB_LOG: "false"
     AutoPublishAlias: live
     DeploymentPreference:
       Type: !If [IsProduction, "Canary10Percent5Minutes", "AllAtOnce"]

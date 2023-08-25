@@ -14,8 +14,8 @@ import (
 	"github.com/rotiroti/alessandrina/domain"
 )
 
-// ErrMissingTableName is returned when the TABLE_NAME environment variable is not set.
-var ErrMissingTableName = errors.New("missing TABLE_NAME environment variable")
+// ErrMissingTableName is returned when the DB_TABLE environment variable is not set.
+var ErrMissingTableName = errors.New("missing DB_TABLE environment variable")
 
 // DefaultTableScanLimit is the default limit for the Scan operation.
 //
@@ -23,12 +23,59 @@ var ErrMissingTableName = errors.New("missing TABLE_NAME environment variable")
 const DefaultTableScanLimit = 25
 
 // Option is a function that configures a Store.
-type Option func(*Store)
+type Option func(*Store) error
 
 // WithClient returns a Store Option that sets the DynamoDB client.
 func WithClient(client DynamoDBClient) Option {
-	return func(s *Store) {
+	return func(s *Store) error {
 		s.client = client
+
+		return nil
+	}
+}
+
+// WithClientLog returns a Store Option that sets the DynamoDB client with logging enabled.
+func WithClientLog() Option {
+	return func(s *Store) error {
+		logMode := aws.LogRequestWithBody | aws.LogResponseWithBody
+		conf, err := config.LoadDefaultConfig(context.Background(), config.WithClientLogMode(logMode))
+
+		if err != nil {
+			return fmt.Errorf("withclientlog: loaddefaultconfig: %w", err)
+		}
+
+		s.client = dynamodb.NewFromConfig(conf)
+
+		return nil
+	}
+}
+
+// WithLocalStack returns a Store Option that sets the DynamoDB client with LocalStack.
+func WithLocalStack() Option {
+	return func(s *Store) error {
+		options := []func(*config.LoadOptions) error{}
+		resolver := aws.EndpointResolverWithOptionsFunc(
+			func(_, region string, options ...interface{}) (aws.Endpoint, error) {
+				return aws.Endpoint{
+					PartitionID:   "aws",
+					URL:           "http://localstack_main:4566",
+					SigningRegion: region,
+				}, nil
+			})
+		logMode := aws.LogRequestWithBody | aws.LogResponseWithBody
+		options = append(options,
+			config.WithEndpointResolverWithOptions(resolver),
+			config.WithClientLogMode(logMode),
+		)
+
+		conf, err := config.LoadDefaultConfig(context.Background(), options...)
+		if err != nil {
+			return fmt.Errorf("withlocalstack: loaddefaultconfig: %w", err)
+		}
+
+		s.client = dynamodb.NewFromConfig(conf)
+
+		return nil
 	}
 }
 
@@ -58,7 +105,10 @@ func NewStore(ctx context.Context, table string, opts ...Option) (*Store, error)
 	store := &Store{table: table}
 
 	for _, opt := range opts {
-		opt(store)
+		err := opt(store)
+		if err != nil {
+			return nil, fmt.Errorf("newstore: %w", err)
+		}
 	}
 
 	if store.client == nil {
@@ -69,37 +119,6 @@ func NewStore(ctx context.Context, table string, opts ...Option) (*Store, error)
 
 		store.client = dynamodb.NewFromConfig(cfg)
 	}
-
-	return store, nil
-}
-
-func NewDebugStore(ctx context.Context, table string) (*Store, error) {
-	if table == "" {
-		return nil, fmt.Errorf("newstore: %w", ErrMissingTableName)
-	}
-
-	options := []func(*config.LoadOptions) error{}
-	resolver := aws.EndpointResolverWithOptionsFunc(
-		func(_, region string, options ...interface{}) (aws.Endpoint, error) {
-			return aws.Endpoint{
-				PartitionID:   "aws",
-				URL:           "http://localstack_main:4566",
-				SigningRegion: region,
-			}, nil
-		})
-	logMode := aws.LogRequestWithBody | aws.LogResponseWithBody
-	options = append(options,
-		config.WithEndpointResolverWithOptions(resolver),
-		config.WithClientLogMode(logMode),
-	)
-
-	conf, err := config.LoadDefaultConfig(ctx, options...)
-	if err != nil {
-		return nil, fmt.Errorf("debugstore: loaddefaultconfig: %w", err)
-	}
-
-	client := dynamodb.NewFromConfig(conf)
-	store := &Store{table: table, client: client}
 
 	return store, nil
 }
