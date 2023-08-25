@@ -10,7 +10,7 @@ Globals:
       Variables:
         DB_TABLE: !Ref BooksTable
         DB_CONNECTION: "aws"
-        DB_LOG: "false"
+        DB_LOG: "true"
     AutoPublishAlias: live
     DeploymentPreference:
       Type: !If [IsProduction, "Canary10Percent5Minutes", "AllAtOnce"]

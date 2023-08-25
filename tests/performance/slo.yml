@@ -19,7 +19,7 @@ config:
           duration: 30
           arrivalRate: 10
           maxVusers: 10
-    # 15 users for 30 seconds calling all endpoints (10 * 30 * 4 = 1800 requests)
+    # 15 users for 30 seconds calling all endpoints (15 * 30 * 4 = 1800 requests)
     slo30sec15vus:
       target: "{{ $processEnvironment.API_URL }}"
       phases:
