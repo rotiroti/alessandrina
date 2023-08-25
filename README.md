@@ -87,10 +87,15 @@ The serverless application can be configured via some environment variables.
 
 ```shell
 # Set the table name (mandatory)
-TABLE_NAME=BooksTable-local
+DB_TABLE=BooksTable-local
 
-# Use a local DynamoDB storage (optional, require Localstack)
-DEBUG_MODE=true
+# Set the DynamoDB client connection (possible values: aws|localstack, default: aws)
+DB_CONNECTION=localstack
+
+# Enable AWS Client Logs for the DynamoDB service (default: false)
+#
+# When running with DB_CONNECTION=localstack, client logs are enabled as default
+DB_LOG=true
 ```
 
 ## Makefile Commands

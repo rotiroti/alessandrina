@@ -18,20 +18,32 @@ func main() {
 	}
 }
 
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
+}
+
 func run(ctx context.Context) error {
+	dbTable := getEnv("DB_TABLE", "")
+	dbConn := getEnv("DB_CONNECTION", "aws")
+	dbLog := getEnv("DB_LOG", "false")
+
 	var (
 		store *ddb.Store
 		err   error
 	)
 
-	tableName := os.Getenv("TABLE_NAME")
-	debugMode := os.Getenv("DEBUG_MODE")
-
-	switch debugMode {
-	case "true":
-		store, err = ddb.NewDebugStore(ctx, tableName)
+	switch dbConn {
+	case "localstack":
+		store, err = ddb.NewStore(ctx, dbTable, ddb.WithLocalStack())
 	default:
-		store, err = ddb.NewStore(ctx, tableName)
+		if dbLog == "true" {
+			store, err = ddb.NewStore(ctx, dbTable, ddb.WithClientLog())
+		} else {
+			store, err = ddb.NewStore(ctx, dbTable)
+		}
 	}
 
 	if err != nil {
@@ -40,6 +52,7 @@ func run(ctx context.Context) error {
 
 	bookCore := domain.NewBookCore(store)
 	handler := web.NewAPIGatewayV2Handler(bookCore)
+
 	lambda.Start(handler.GetBooks)
 
 	return nil
