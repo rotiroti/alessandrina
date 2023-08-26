@@ -46,7 +46,7 @@ scenarios:
           expect:
             statusCode: 200
           capture:
-            json: "$.books[0].id"
+            json: "$.books[*].id"
             as: "id"
       - think: 1
       - get:
