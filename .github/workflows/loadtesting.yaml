@@ -19,18 +19,18 @@ permissions:
   contents: read
 
 jobs:
-  load-tests:
-    if: github.ref == 'refs/heads/main'
+  setup-environment:
     runs-on: ubuntu-latest
-    container: artilleryio/artillery:latest
+    outputs:
+      API_URL: ${{ steps.setup-env.outputs.API_URL }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Setup AWS SAM
-        uses: aws-actions/setup-sam@v2
+      - uses: actions/checkout@v3
+      - uses: aws-actions/setup-sam@v2
         with:
           use-installer: true
+      - uses: actions/download-artifact@v3
+        with:
+          name: packaged-dev.yaml
 
       - name: Assume the dev pipeline user role
         uses: aws-actions/configure-aws-credentials@v2
@@ -38,12 +38,21 @@ jobs:
           aws-region: ${{ env.DEV_REGION }}
           role-to-assume: ${{ env.DEV_PIPELINE_EXECUTION_ROLE }}
           role-session-name: load-testing
-          role-skip-session-tagging: true
 
-      - name: Extract API URL and save for the next "integration tests" step
+      - name: Extract API URL
+        id: setup-env
         run: |
           API_URL=$(sam list stack-outputs --stack-name ${DEV_STACK_NAME} --region ${DEV_REGION} --output json | jq -r '.[] | select(.OutputKey=="WebEndpoint")|.OutputValue')
-          echo "API_URL=${API_URL%/}" >> $GITHUB_ENV
+          echo "API_URL=${API_URL%/}" >> $GITHUB_OUTPUT
+
+  load-tests:
+    if: github.ref == 'refs/heads/main'
+    needs: [setup-environment]
+    runs-on: ubuntu-latest
+    container: artilleryio/artillery:latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Install additional dependencies
         run: npm install -g artillery-plugin-expect artillery-plugin-ensure
@@ -53,12 +62,12 @@ jobs:
 
       - name: Execute smoke test
         run: |
-          API_URL=${{ env.API_URL }} /home/node/artillery/bin/run run --output reports/smoke.json tests/performance/smoke.yml
+          API_URL=${{ needs.setup-environment.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/smoke.json tests/performance/smoke.yml
           /home/node/artillery/bin/run report --output reports/smoke.html reports/smoke.json
 
       - name: Execute SLO test
         run: |
-          API_URL=${{ env.API_URL }} /home/node/artillery/bin/run run --output reports/${{ env.SLO_TEST }}.json --environment=${{ env.SLO_TEST }} tests/performance/slo.yml
+          API_URL=${{ needs.setup-environment.outputs.API_URL }} /home/node/artillery/bin/run run --output reports/${{ env.SLO_TEST }}.json --environment=${{ env.SLO_TEST }} tests/performance/slo.yml
           /home/node/artillery/bin/run report --output reports/${{ env.SLO_TEST }}.html reports/${{ env.SLO_TEST }}.json
 
       - name: Archive test report
