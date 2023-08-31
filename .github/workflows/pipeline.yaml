@@ -4,6 +4,8 @@ on:
   push:
     paths-ignore:
       - 'README.md'
+      - '.github/workflows/loadtesting.yaml'
+      - '.github/workflows/cleanup.yaml'
 
     branches:
       - 'main'
