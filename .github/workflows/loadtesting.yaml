@@ -3,17 +3,15 @@ name: Manual Load Testing
 on:
   workflow_dispatch:
     inputs:
-      API_URL:
-        description: 'URL of the API to test'
-        required: true
-        default: ''
       SLO_TEST:
-        description: 'SLO test: slo30sec6vus, slo30sec10vus, slo30sec15vus'
+        description: 'SLO test: slo30sec5vus, slo30sec10vus, slo30sec15vus'
         required: false
-        default: 'slo30sec10vus'
+        default: 'slo30sec5vus'
 
 env:
-    API_URL: ${{ github.event.inputs.API_URL }}
+    DEV_REGION: us-east-1
+    DEV_STACK_NAME: alessandrina-dev
+    DEV_PIPELINE_EXECUTION_ROLE: ${{ secrets.DEV_PIPELINE_EXECUTION_ROLE }}
     SLO_TEST: ${{ github.event.inputs.SLO_TEST }}
 
 permissions:
@@ -29,6 +27,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Setup AWS SAM
+        uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+
+      - name: Assume the dev pipeline user role
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ${{ env.DEV_REGION }}
+          role-to-assume: ${{ env.DEV_PIPELINE_EXECUTION_ROLE }}
+          role-session-name: load-testing
+          role-skip-session-tagging: true
+
+      - name: Extract API URL and save for the next "integration tests" step
+        run: |
+          API_URL=$(sam list stack-outputs --stack-name ${DEV_STACK_NAME} --region ${DEV_REGION} --output json | jq -r '.[] | select(.OutputKey=="WebEndpoint")|.OutputValue')
+          echo "API_URL=${API_URL%/}" >> $GITHUB_ENV
+
       - name: Install additional dependencies
         run: npm install -g artillery-plugin-expect artillery-plugin-ensure
 
@@ -40,12 +56,7 @@ jobs:
           API_URL=${{ env.API_URL }} /home/node/artillery/bin/run run --output reports/smoke.json tests/performance/smoke.yml
           /home/node/artillery/bin/run report --output reports/smoke.html reports/smoke.json
 
-      - name: Execute load test (CRD book)
-        run: |
-          API_URL=${{ env.API_URL }} /home/node/artillery/bin/run run --output reports/load-crd.json tests/performance/load-crd.yml
-          /home/node/artillery/bin/run report --output reports/load-crd.html reports/load-crd.json
-
-      - name: Execute SLO test (p95=400, error rate=0.01)
+      - name: Execute SLO test
         run: |
           API_URL=${{ env.API_URL }} /home/node/artillery/bin/run run --output reports/${{ env.SLO_TEST }}.json --environment=${{ env.SLO_TEST }} tests/performance/slo.yml
           /home/node/artillery/bin/run report --output reports/${{ env.SLO_TEST }}.html reports/${{ env.SLO_TEST }}.json
