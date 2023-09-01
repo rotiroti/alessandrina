@@ -3,6 +3,7 @@ package web
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -65,6 +66,10 @@ func (h *APIGatewayV2Handler) GetBook(ctx context.Context, req events.APIGateway
 
 	ret, err := h.book.FindOne(ctx, id)
 	if err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return errorResponse(http.StatusNotFound, err.Error()), nil
+		}
+
 		return errorResponse(http.StatusInternalServerError, err.Error()), nil
 	}
 
@@ -79,6 +84,10 @@ func (h *APIGatewayV2Handler) DeleteBook(ctx context.Context, req events.APIGate
 	}
 
 	if err := h.book.Delete(ctx, id); err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return jsonResponse(http.StatusNoContent, nil), nil
+		}
+
 		return errorResponse(http.StatusInternalServerError, err.Error()), nil
 	}
 

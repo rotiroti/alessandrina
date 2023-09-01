@@ -69,4 +69,3 @@ scenarios:
           expect:
             statusCode:
               - 204
-              - 500

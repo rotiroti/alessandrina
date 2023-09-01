@@ -2,6 +2,7 @@ package validation
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -78,7 +79,7 @@ func (c *Config) Check(val any) error {
 		// Use a type assertion to get the real error value.
 		verrors, ok := err.(validator.ValidationErrors)
 		if !ok {
-			return err
+			return fmt.Errorf("validation.check: %w", err)
 		}
 
 		var fields FieldErrors
