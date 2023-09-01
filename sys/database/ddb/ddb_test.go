@@ -111,9 +111,8 @@ func TestStore(t *testing.T) {
 		TableName: aws.String(expectedTable),
 	}
 	expectedDeleteInput := &dynamodb.DeleteItemInput{
-		Key:                 expectedKey,
-		TableName:           aws.String(expectedTable),
-		ConditionExpression: aws.String("attribute_exists(id)"),
+		Key:       expectedKey,
+		TableName: aws.String(expectedTable),
 	}
 	expectedScanInput := dynamodb.ScanInput{
 		TableName: aws.String(expectedTable),

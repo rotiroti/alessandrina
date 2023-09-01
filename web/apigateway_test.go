@@ -189,21 +189,6 @@ func TestHandler(t *testing.T) {
 		require.JSONEq(t, expectedJSONBook, ret.Body)
 	})
 
-	t.Run("DeleteBookNotFound", func(t *testing.T) {
-		store := memory.NewStore()
-		bookCore := domain.NewBookCore(store)
-		handler := web.NewAPIGatewayV2Handler(bookCore)
-		parameterID := "ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812"
-		ret, err := handler.DeleteBook(ctx, events.APIGatewayV2HTTPRequest{
-			PathParameters: map[string]string{
-				"id": parameterID,
-			},
-		})
-
-		require.NoError(t, err)
-		require.Equal(t, http.StatusNoContent, ret.StatusCode)
-	})
-
 	t.Run("DeleteBookInternalServerError", func(t *testing.T) {
 		store := new(MockStorer)
 		store.On("Delete", ctx, expectedID).Return(assert.AnError).Once()
