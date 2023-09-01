@@ -70,10 +70,6 @@ func (s *Store) Delete(_ context.Context, bookID uuid.UUID) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	if _, exists := s.container[bookID.String()]; !exists {
-		return fmt.Errorf("memory.findone: %w", domain.ErrNotFound)
-	}
-
 	delete(s.container, bookID.String())
 
 	return nil

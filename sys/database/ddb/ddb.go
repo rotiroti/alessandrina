@@ -198,7 +198,6 @@ func (s *Store) Delete(ctx context.Context, bookID uuid.UUID) error {
 		Key: map[string]types.AttributeValue{
 			"id": &types.AttributeValueMemberS{Value: bookID.String()},
 		},
-		ConditionExpression: aws.String("attribute_exists(id)"),
 	})
 
 	if err != nil {

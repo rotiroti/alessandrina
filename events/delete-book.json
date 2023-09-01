@@ -1,9 +1,9 @@
 {
     "resource": "/books/{id}",
-    "path": "/ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812",
+    "path": "/44e260dc-731e-45ee-a5c1-760546b3b08f",
     "httpMethod": "DELETE",
     "pathParameters": {
-      "id": "ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812"
+      "id": "44e260dc-731e-45ee-a5c1-760546b3b08f"
     },
     "headers": {
       "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
@@ -100,7 +100,7 @@
         "userAgent": "Custom User Agent String",
         "user": null
       },
-      "path": "/ad8b59c2-5fe6-4267-b0cf-6d2f9eb1c812",
+      "path": "/44e260dc-731e-45ee-a5c1-760546b3b08f",
       "resourcePath": "/books/{id}",
       "httpMethod": "DELETE",
       "apiId": "1234567890",

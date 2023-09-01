@@ -63,11 +63,11 @@ func TestMemoryStore(t *testing.T) {
 		require.NoError(t, err2)
 	})
 
-	t.Run("should throw error for deleting a non existing book", func(t *testing.T) {
+	t.Run("should not throw error for deleting a non existing book", func(t *testing.T) {
 		t.Parallel()
 		store := memory.NewStore()
 		err := store.Delete(context.Background(), book.ID)
-		require.ErrorIs(t, err, domain.ErrNotFound)
+		require.NoError(t, err)
 	})
 
 	t.Run("should return all books", func(t *testing.T) {
