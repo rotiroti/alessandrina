@@ -140,7 +140,7 @@ func TestHandler(t *testing.T) {
 		require.JSONEq(t, expectedJSONBook, ret.Body)
 	})
 
-	t.Run("GetBookInternalServerError", func(t *testing.T) {
+	t.Run("GetBookNotFound", func(t *testing.T) {
 		store := memory.NewStore()
 		bookCore := domain.NewBookCore(store)
 		handler := web.NewAPIGatewayV2Handler(bookCore)
@@ -148,6 +148,21 @@ func TestHandler(t *testing.T) {
 		ret, err := handler.GetBook(ctx, events.APIGatewayV2HTTPRequest{
 			PathParameters: map[string]string{
 				"id": parameterID,
+			},
+		})
+
+		require.NoError(t, err)
+		require.Equal(t, http.StatusNotFound, ret.StatusCode)
+	})
+
+	t.Run("GetBookInternalServerError", func(t *testing.T) {
+		store := new(MockStorer)
+		store.On("FindOne", ctx, expectedID).Return(domain.Book{}, assert.AnError).Once()
+		bookCore := domain.NewBookCore(store)
+		handler := web.NewAPIGatewayV2Handler(bookCore)
+		ret, err := handler.GetBook(ctx, events.APIGatewayV2HTTPRequest{
+			PathParameters: map[string]string{
+				"id": expectedID.String(),
 			},
 		})
 
@@ -174,7 +189,7 @@ func TestHandler(t *testing.T) {
 		require.JSONEq(t, expectedJSONBook, ret.Body)
 	})
 
-	t.Run("DeleteBookInternalServerError", func(t *testing.T) {
+	t.Run("DeleteBookNotFound", func(t *testing.T) {
 		store := memory.NewStore()
 		bookCore := domain.NewBookCore(store)
 		handler := web.NewAPIGatewayV2Handler(bookCore)
@@ -182,6 +197,21 @@ func TestHandler(t *testing.T) {
 		ret, err := handler.DeleteBook(ctx, events.APIGatewayV2HTTPRequest{
 			PathParameters: map[string]string{
 				"id": parameterID,
+			},
+		})
+
+		require.NoError(t, err)
+		require.Equal(t, http.StatusNoContent, ret.StatusCode)
+	})
+
+	t.Run("DeleteBookInternalServerError", func(t *testing.T) {
+		store := new(MockStorer)
+		store.On("Delete", ctx, expectedID).Return(assert.AnError).Once()
+		bookCore := domain.NewBookCore(store)
+		handler := web.NewAPIGatewayV2Handler(bookCore)
+		ret, err := handler.DeleteBook(ctx, events.APIGatewayV2HTTPRequest{
+			PathParameters: map[string]string{
+				"id": expectedID.String(),
 			},
 		})
 

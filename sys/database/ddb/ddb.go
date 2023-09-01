@@ -41,7 +41,7 @@ func WithClientLog() Option {
 		conf, err := config.LoadDefaultConfig(context.Background(), config.WithClientLogMode(logMode))
 
 		if err != nil {
-			return fmt.Errorf("withclientlog: loaddefaultconfig: %w", err)
+			return fmt.Errorf("ddb.withclientlog loaddefaultconfig: %w", err)
 		}
 
 		s.client = dynamodb.NewFromConfig(conf)
@@ -70,7 +70,7 @@ func WithLocalStack() Option {
 
 		conf, err := config.LoadDefaultConfig(context.Background(), options...)
 		if err != nil {
-			return fmt.Errorf("withlocalstack: loaddefaultconfig: %w", err)
+			return fmt.Errorf("ddb.withlocalstack loaddefaultconfig: %w", err)
 		}
 
 		s.client = dynamodb.NewFromConfig(conf)
@@ -99,7 +99,7 @@ var _ domain.Storer = (*Store)(nil)
 // NewStore returns a new DynamoDB Store.
 func NewStore(ctx context.Context, table string, opts ...Option) (*Store, error) {
 	if table == "" {
-		return nil, fmt.Errorf("newstore: %w", ErrMissingTableName)
+		return nil, fmt.Errorf("ddb.newstore: %w", ErrMissingTableName)
 	}
 
 	store := &Store{table: table}
@@ -107,14 +107,14 @@ func NewStore(ctx context.Context, table string, opts ...Option) (*Store, error)
 	for _, opt := range opts {
 		err := opt(store)
 		if err != nil {
-			return nil, fmt.Errorf("newstore: %w", err)
+			return nil, fmt.Errorf("ddb.newstore: %w", err)
 		}
 	}
 
 	if store.client == nil {
 		cfg, err := config.LoadDefaultConfig(ctx)
 		if err != nil {
-			return nil, fmt.Errorf("newstore: loaddefaultconfig: %w", err)
+			return nil, fmt.Errorf("ddb.newstore loaddefaultconfig: %w", err)
 		}
 
 		store.client = dynamodb.NewFromConfig(cfg)
@@ -127,7 +127,7 @@ func NewStore(ctx context.Context, table string, opts ...Option) (*Store, error)
 func (s *Store) Save(ctx context.Context, book domain.Book) error {
 	item, err := attributevalue.MarshalMap(ToDynamodbBook(book))
 	if err != nil {
-		return fmt.Errorf("save: marshalmap: %w", err)
+		return fmt.Errorf("ddb.save marshalmap: %w", err)
 	}
 
 	_, err = s.client.PutItem(ctx, &dynamodb.PutItemInput{
@@ -136,7 +136,7 @@ func (s *Store) Save(ctx context.Context, book domain.Book) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("save: putitem: %w", err)
+		return fmt.Errorf("ddb.save putitem: %w", err)
 	}
 
 	return nil
@@ -150,13 +150,13 @@ func (s *Store) FindAll(ctx context.Context) ([]domain.Book, error) {
 	})
 
 	if err != nil {
-		return []domain.Book{}, fmt.Errorf("findall: scan: %w", err)
+		return []domain.Book{}, fmt.Errorf("ddb.findall scan: %w", err)
 	}
 
 	items := make([]DynamodbBook, 0, len(response.Items))
 
 	if err = attributevalue.UnmarshalListOfMaps(response.Items, &items); err != nil {
-		return []domain.Book{}, fmt.Errorf("findall: unmarshallistofmaps: %w", err)
+		return []domain.Book{}, fmt.Errorf("ddb.findall unmarshallistofmaps: %w", err)
 	}
 
 	books := ToDomainBooks(items)
@@ -175,15 +175,15 @@ func (s *Store) FindOne(ctx context.Context, bookID uuid.UUID) (domain.Book, err
 	})
 
 	if err != nil {
-		return domain.Book{}, fmt.Errorf("findbyid: getitem[%v]: %w", bookID, err)
+		return domain.Book{}, fmt.Errorf("ddb.findone getitem: %w", err)
 	}
 
 	if len(response.Item) == 0 {
-		return domain.Book{}, fmt.Errorf("findbyid: getitem[%v]: %w", bookID, domain.ErrNotFound)
+		return domain.Book{}, fmt.Errorf("ddb.findone getitem: %w", domain.ErrNotFound)
 	}
 
 	if err = attributevalue.UnmarshalMap(response.Item, &item); err != nil {
-		return domain.Book{}, fmt.Errorf("findbyid: unmarshalmap: %w", err)
+		return domain.Book{}, fmt.Errorf("ddb.findone unmarshalmap: %w", err)
 	}
 
 	book := ToDomainBook(item)
@@ -202,7 +202,7 @@ func (s *Store) Delete(ctx context.Context, bookID uuid.UUID) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("delete: %w", err)
+		return fmt.Errorf("ddb.delete deleteitem: %w", err)
 	}
 
 	return nil

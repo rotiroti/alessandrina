@@ -58,7 +58,7 @@ func (c *BookCore) Save(ctx context.Context, nb NewBook) (Book, error) {
 	}
 
 	if err := c.storer.Save(ctx, book); err != nil {
-		return Book{}, fmt.Errorf("save: %w", err)
+		return Book{}, fmt.Errorf("domain.save failed: %w", err)
 	}
 
 	return book, nil
@@ -68,7 +68,7 @@ func (c *BookCore) Save(ctx context.Context, nb NewBook) (Book, error) {
 func (c *BookCore) FindAll(ctx context.Context) ([]Book, error) {
 	books, err := c.storer.FindAll(ctx)
 	if err != nil {
-		return []Book{}, fmt.Errorf("findall: %w", err)
+		return []Book{}, fmt.Errorf("domain.findall failed: %w", err)
 	}
 
 	return books, nil
@@ -78,7 +78,7 @@ func (c *BookCore) FindAll(ctx context.Context) ([]Book, error) {
 func (c *BookCore) FindOne(ctx context.Context, bookID uuid.UUID) (Book, error) {
 	book, err := c.storer.FindOne(ctx, bookID)
 	if err != nil {
-		return Book{}, fmt.Errorf("findone: bookID[%s]: %w", bookID, err)
+		return Book{}, fmt.Errorf("domain.findone failed: %w", err)
 	}
 
 	return book, nil
@@ -87,7 +87,7 @@ func (c *BookCore) FindOne(ctx context.Context, bookID uuid.UUID) (Book, error) 
 // Delete removes a book from a storage by using bookID as primary key.
 func (c *BookCore) Delete(ctx context.Context, bookID uuid.UUID) error {
 	if err := c.storer.Delete(ctx, bookID); err != nil {
-		return fmt.Errorf("delete: bookID[%s]: %w", bookID, err)
+		return fmt.Errorf("domain.delete failed: %w", err)
 	}
 
 	return nil

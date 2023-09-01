@@ -2,6 +2,7 @@ package memory
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"github.com/google/uuid"
@@ -30,7 +31,7 @@ func (s *Store) Save(_ context.Context, book domain.Book) error {
 	defer s.mu.Unlock()
 
 	if _, exists := s.container[book.ID.String()]; exists {
-		return domain.ErrAlreadyExists
+		return fmt.Errorf("memory.save: %w", domain.ErrAlreadyExists)
 	}
 
 	s.container[book.ID.String()] = book
@@ -58,7 +59,7 @@ func (s *Store) FindOne(_ context.Context, bookID uuid.UUID) (domain.Book, error
 
 	book, exists := s.container[bookID.String()]
 	if !exists {
-		return domain.Book{}, domain.ErrNotFound
+		return domain.Book{}, fmt.Errorf("memory.findone: %w", domain.ErrNotFound)
 	}
 
 	return book, nil
@@ -70,7 +71,7 @@ func (s *Store) Delete(_ context.Context, bookID uuid.UUID) error {
 	defer s.mu.Unlock()
 
 	if _, exists := s.container[bookID.String()]; !exists {
-		return domain.ErrNotFound
+		return fmt.Errorf("memory.findone: %w", domain.ErrNotFound)
 	}
 
 	delete(s.container, bookID.String())

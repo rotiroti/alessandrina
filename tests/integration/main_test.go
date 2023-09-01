@@ -188,15 +188,6 @@ func TestErrorResponses(t *testing.T) {
 			want: http.StatusBadRequest,
 		},
 		{
-			name: "GetBookIdNotFound",
-			args: args{
-				method: http.MethodGet,
-				url:    fmt.Sprintf("%s/%s", baseURL, uuid.New().String()),
-				body:   nil,
-			},
-			want: http.StatusInternalServerError,
-		},
-		{
 			name: "CreateBookInvalidPayload",
 			args: args{
 				method: http.MethodPost,
@@ -222,15 +213,6 @@ func TestErrorResponses(t *testing.T) {
 				body:   nil,
 			},
 			want: http.StatusBadRequest,
-		},
-		{
-			name: "DeleteBookIdNotFound",
-			args: args{
-				method: http.MethodDelete,
-				url:    fmt.Sprintf("%s/%s", baseURL, uuid.New().String()),
-				body:   nil,
-			},
-			want: http.StatusInternalServerError,
 		},
 	}
 
