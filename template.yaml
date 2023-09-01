@@ -177,7 +177,7 @@ Resources:
                   [
                     "AWS/ApiGateway",
                     "4XXError",
-                    "ApiName",
+                    "ApiId",
                     "${BooksAPI}",
                     { "yAxis": "right" }
                   ],
@@ -187,11 +187,11 @@ Resources:
                   [".", "IntegrationLatency", ".", ".", { "stat": "Average" }],
                   [".", "Latency", ".", ".", { "stat": "Average" }]
                 ],
-                "view": "timeSeries",
+                "view": "singleValue",
                 "stacked": false,
                 "region": "${AWS::Region}",
                 "period": 60,
-                "stat": "Sum",
+                "stat": "Average",
                 "title": "API Gateway"
               }
             },
