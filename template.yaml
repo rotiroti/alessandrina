@@ -178,7 +178,7 @@ Resources:
                     "AWS/ApiGateway",
                     "4XXError",
                     "ApiName",
-                    "${AWS::StackName}",
+                    "${BooksAPI}",
                     { "yAxis": "right" }
                   ],
                   [".", "5XXError", ".", ".", { "yAxis": "right" }],
