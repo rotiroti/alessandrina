@@ -16,7 +16,7 @@ config:
   ensure:
     maxErrorRate: 1
 scenarios:
-  - name: "Create, Read, Delete"
+  - name: "Create, List, Read, Delete"
     flow:
       - function: "generateRandomData"
       - post:
@@ -30,8 +30,13 @@ scenarios:
           expect:
             statusCode: 201
             hasProperty: "id"
+      - think: 1
+      - get:
+          url: "/books"
+          expect:
+            statusCode: 200
           capture:
-            json: "$.id"
+            json: "$.books[*].id"
             as: "id"
       - think: 1
       - get:
