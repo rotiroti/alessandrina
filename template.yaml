@@ -167,19 +167,69 @@ Resources:
         {
           "widgets": [
             {
-              "height": 2,
-              "width": 24,
-              "y": 0,
+              "height": 5,
+              "width": 8,
+              "y": 2,
               "x": 0,
-              "type": "text",
+              "type": "metric",
               "properties": {
-                "markdown": "# API Gateway"
+                "legend": {
+                  "position": "hidden"
+                },
+                "region": "${AWS::Region}",
+                "liveData": false,
+                "period": 60,
+                "timezone": "UTC",
+                "title": "Count: Sum",
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [["AWS/ApiGateway", "Count", "ApiId", "${BooksAPI}"]]
               }
             },
             {
-              "height": 3,
-              "width": 14,
+              "height": 5,
+              "width": 8,
               "y": 2,
+              "x": 8,
+              "type": "metric",
+              "properties": {
+                "legend": {
+                  "position": "hidden"
+                },
+                "region": "${AWS::Region}",
+                "liveData": false,
+                "period": 60,
+                "timezone": "UTC",
+                "title": "5XXError: Sum",
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [["AWS/ApiGateway", "5xx", "ApiId", "${BooksAPI}"]]
+              }
+            },
+            {
+              "height": 5,
+              "width": 8,
+              "y": 2,
+              "x": 16,
+              "type": "metric",
+              "properties": {
+                "legend": {
+                  "position": "hidden"
+                },
+                "region": "${AWS::Region}",
+                "liveData": false,
+                "period": 60,
+                "timezone": "UTC",
+                "title": "4XXError: Sum",
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [["AWS/ApiGateway", "4xx", "ApiId", "${BooksAPI}"]]
+              }
+            },
+            {
+              "height": 5,
+              "width": 12,
+              "y": 7,
               "x": 0,
               "type": "metric",
               "properties": {
@@ -189,52 +239,31 @@ Resources:
                     "Latency",
                     "ApiId",
                     "${BooksAPI}",
-                    {
-                      "region": "${AWS::Region}",
-                      "label": "Average",
-                      "stat": "Average",
-                      "id": "m1"
-                    }
+                    { "region": "${AWS::Region}", "stat": "p50", "label": "p50" }
                   ],
                   [
                     "...",
-                    {
-                      "region": "${AWS::Region}",
-                      "label": "p50",
-                      "id": "m2",
-                      "stat": "p50"
-                    }
+                    { "region": "${AWS::Region}", "stat": "p90", "label": "p90" }
                   ],
-                  [
-                    "...",
-                    {
-                      "region": "${AWS::Region}",
-                      "label": "p90",
-                      "id": "m3",
-                      "stat": "p90"
-                    }
-                  ],
-                  [
-                    "...",
-                    {
-                      "region": "${AWS::Region}",
-                      "label": "p99",
-                      "id": "m3",
-                      "stat": "p99"
-                    }
-                  ]
+                  ["...", { "region": "${AWS::Region}", "stat": "p99", "label": "p99" }]
                 ],
-                "view": "singleValue",
+                "legend": {
+                  "position": "bottom"
+                },
                 "region": "${AWS::Region}",
+                "liveData": false,
                 "period": 60,
-                "title": "Latencies"
+                "timezone": "UTC",
+                "title": "Latencies: percentiles",
+                "view": "timeSeries",
+                "stacked": false
               }
             },
             {
-              "height": 3,
-              "width": 10,
-              "y": 2,
-              "x": 14,
+              "height": 5,
+              "width": 12,
+              "y": 7,
+              "x": 12,
               "type": "metric",
               "properties": {
                 "metrics": [
@@ -243,121 +272,137 @@ Resources:
                     "IntegrationLatency",
                     "ApiId",
                     "${BooksAPI}",
-                    {
-                      "region": "${AWS::Region}",
-                      "label": "Average",
-                      "stat": "Average",
-                      "id": "m1"
-                    }
+                    { "region": "${AWS::Region}", "stat": "p50", "label": "p50" }
                   ],
                   [
                     "...",
-                    {
-                      "region": "${AWS::Region}",
-                      "label": "p50",
-                      "id": "m2",
-                      "stat": "p50"
-                    }
+                    { "region": "${AWS::Region}", "stat": "p90", "label": "p90" }
                   ],
-                  [
-                    "...",
-                    {
-                      "region": "${AWS::Region}",
-                      "label": "p90",
-                      "id": "m3",
-                      "stat": "p90"
-                    }
-                  ],
-                  [
-                    "...",
-                    {
-                      "region": "${AWS::Region}",
-                      "label": "p99",
-                      "id": "m4",
-                      "stat": "p99"
-                    }
-                  ]
+                  ["...", { "region": "${AWS::Region}", "stat": "p99", "label": "p99" }]
                 ],
-                "view": "singleValue",
+                "legend": {
+                  "position": "bottom"
+                },
                 "region": "${AWS::Region}",
+                "liveData": false,
                 "period": 60,
-                "title": "Integration Latencies"
+                "timezone": "UTC",
+                "title": "Integration Latencies: percentiles",
+                "view": "timeSeries",
+                "stacked": false
               }
             },
             {
-              "height": 3,
-              "width": 4,
-              "y": 10,
-              "x": 10,
+              "height": 2,
+              "width": 24,
+              "y": 0,
+              "x": 0,
+              "type": "text",
+              "properties": {
+                "markdown": "#  HTTP API"
+              }
+            },
+            {
+              "height": 4,
+              "width": 12,
+              "y": 14,
+              "x": 0,
               "type": "metric",
               "properties": {
                 "metrics": [
                   [
-                    {
-                      "expression": "100*(SUM([m1,m2,m3,m4])/SUM([m5,m6,m7,m8]))",
-                      "label": "",
-                      "id": "e1",
-                      "region": "${AWS::Region}",
-                      "color": "#ffffff"
-                    }
+                    "AWS/Lambda",
+                    "Invocations",
+                    "FunctionName",
+                    "${GetBookFunction}",
+                    { "region": "${AWS::Region}" }
                   ],
+                  ["...", "${GetBooksFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${CreateBookFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${DeleteBookFunction}", { "region": "${AWS::Region}" }]
+                ],
+                "legend": {
+                  "position": "right"
+                },
+                "region": "${AWS::Region}",
+                "liveData": false,
+                "timezone": "UTC",
+                "title": "Invocations: Sum",
+                "period": 60,
+                "view": "timeSeries",
+                "stacked": false,
+                "stat": "Sum"
+              }
+            },
+            {
+              "height": 4,
+              "width": 12,
+              "y": 14,
+              "x": 12,
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  [
+                    "AWS/Lambda",
+                    "Duration",
+                    "FunctionName",
+                    "${GetBookFunction}",
+                    { "region": "${AWS::Region}" }
+                  ],
+                  ["...", "${GetBooksFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${CreateBookFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${DeleteBookFunction}", { "region": "${AWS::Region}" }]
+                ],
+                "legend": {
+                  "position": "right"
+                },
+                "region": "${AWS::Region}",
+                "liveData": false,
+                "timezone": "UTC",
+                "title": "Duration: Average",
+                "period": 60,
+                "view": "timeSeries",
+                "stacked": false,
+                "stat": "Average"
+              }
+            },
+            {
+              "height": 4,
+              "width": 12,
+              "y": 18,
+              "x": 0,
+              "type": "metric",
+              "properties": {
+                "metrics": [
                   [
                     "AWS/Lambda",
                     "Errors",
                     "FunctionName",
-                    "${CreateBookFunction}",
-                    { "id": "m1", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
-                    "${DeleteBookFunction}",
-                    { "id": "m2", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
                     "${GetBookFunction}",
-                    { "id": "m3", "visible": false, "region": "${AWS::Region}" }
+                    { "region": "${AWS::Region}" }
                   ],
-                  [
-                    "...",
-                    "${GetBooksFunction}",
-                    { "id": "m4", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    ".",
-                    "Invocations",
-                    ".",
-                    "${CreateBookFunction}",
-                    { "id": "m5", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
-                    "${DeleteBookFunction}",
-                    { "id": "m6", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
-                    "${GetBookFunction}",
-                    { "id": "m7", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
-                    "${GetBooksFunction}",
-                    { "id": "m8", "visible": false, "region": "${AWS::Region}" }
-                  ]
+                  ["...", "${GetBooksFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${CreateBookFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${DeleteBookFunction}", { "region": "${AWS::Region}" }]
                 ],
-                "view": "singleValue",
+                "legend": {
+                  "position": "right"
+                },
                 "region": "${AWS::Region}",
-                "stat": "Sum",
+                "liveData": false,
+                "timezone": "UTC",
+                "title": "Errors: Sum",
                 "period": 60,
-                "title": "% Error Rate"
+                "view": "timeSeries",
+                "stacked": false,
+                "stat": "Sum"
               }
             },
             {
-              "height": 6,
+              "height": 4,
               "width": 12,
-              "y": 19,
-              "x": 0,
+              "y": 18,
+              "x": 12,
               "type": "metric",
               "properties": {
                 "metrics": [
@@ -365,45 +410,30 @@ Resources:
                     "AWS/Lambda",
                     "Throttles",
                     "FunctionName",
-                    "${CreateBookFunction}",
-                    { "region": "${AWS::Region}", "yAxis": "right" }
-                  ],
-                  [
-                    "...",
-                    "${GetBooksFunction}",
-                    { "region": "${AWS::Region}", "yAxis": "right" }
-                  ],
-                  [
-                    "...",
-                    "${DeleteBookFunction}",
-                    { "region": "${AWS::Region}", "yAxis": "right" }
-                  ],
-                  [
-                    "...",
                     "${GetBookFunction}",
-                    { "region": "${AWS::Region}", "yAxis": "right" }
-                  ]
+                    { "region": "${AWS::Region}" }
+                  ],
+                  ["...", "${GetBooksFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${CreateBookFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${DeleteBookFunction}", { "region": "${AWS::Region}" }]
                 ],
-                "view": "timeSeries",
-                "region": "${AWS::Region}",
-                "stat": "Sum",
-                "period": 60,
-                "title": "Throttles by Functions",
-                "yAxis": {
-                  "right": {
-                    "label": "",
-                    "showUnits": false
-                  }
-                },
                 "legend": {
-                  "position": "bottom"
-                }
+                  "position": "right"
+                },
+                "region": "${AWS::Region}",
+                "liveData": false,
+                "timezone": "UTC",
+                "title": "Throttles: Sum",
+                "period": 60,
+                "view": "timeSeries",
+                "stacked": false,
+                "stat": "Sum"
               }
             },
             {
               "height": 2,
               "width": 24,
-              "y": 8,
+              "y": 12,
               "x": 0,
               "type": "text",
               "properties": {
@@ -411,550 +441,9 @@ Resources:
               }
             },
             {
-              "height": 3,
-              "width": 5,
-              "y": 5,
-              "x": 19,
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [
-                    {
-                      "expression": "RATE(m1)",
-                      "label": "req/s",
-                      "id": "e1",
-                      "region": "${AWS::Region}"
-                    }
-                  ],
-                  [
-                    "AWS/ApiGateway",
-                    "Count",
-                    "ApiId",
-                    "${BooksAPI}",
-                    { "region": "${AWS::Region}", "id": "m1", "visible": false }
-                  ]
-                ],
-                "legend": {
-                  "position": "bottom"
-                },
-                "region": "${AWS::Region}",
-                "title": "RPS",
-                "period": 60,
-                "view": "singleValue",
-                "stat": "Sum"
-              }
-            },
-            {
-              "height": 3,
-              "width": 5,
-              "y": 5,
-              "x": 14,
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [
-                    {
-                      "expression": "100*(m1/m2)",
-                      "label": "",
-                      "id": "e1",
-                      "region": "${AWS::Region}",
-                      "color": "#ffffff"
-                    }
-                  ],
-                  [
-                    "AWS/ApiGateway",
-                    "5xx",
-                    "ApiId",
-                    "${BooksAPI}",
-                    { "region": "${AWS::Region}", "id": "m1", "visible": false }
-                  ],
-                  [
-                    ".",
-                    "Count",
-                    ".",
-                    ".",
-                    { "id": "m2", "visible": false, "region": "${AWS::Region}" }
-                  ]
-                ],
-                "legend": {
-                  "position": "bottom"
-                },
-                "region": "${AWS::Region}",
-                "title": "% Error Rate",
-                "period": 60,
-                "view": "singleValue"
-              }
-            },
-            {
-              "height": 3,
-              "width": 5,
-              "y": 10,
-              "x": 0,
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [
-                    {
-                      "expression": "SUM(METRICS())",
-                      "label": "",
-                      "id": "e1",
-                      "region": "${AWS::Region}",
-                      "color": "#ffffff"
-                    }
-                  ],
-                  [
-                    "AWS/Lambda",
-                    "Invocations",
-                    "FunctionName",
-                    "${CreateBookFunction}",
-                    { "id": "m1", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
-                    "${DeleteBookFunction}",
-                    { "id": "m2", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
-                    "${GetBooksFunction}",
-                    { "id": "m3", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
-                    "${GetBookFunction}",
-                    { "id": "m4", "visible": false, "region": "${AWS::Region}" }
-                  ]
-                ],
-                "view": "singleValue",
-                "region": "${AWS::Region}",
-                "stat": "Sum",
-                "period": 60,
-                "title": "Total Invocations"
-              }
-            },
-            {
-              "height": 3,
-              "width": 5,
-              "y": 10,
-              "x": 5,
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [
-                    {
-                      "expression": "SUM(METRICS())",
-                      "label": "",
-                      "id": "e1",
-                      "region": "${AWS::Region}",
-                      "color": "#ffffff"
-                    }
-                  ],
-                  [
-                    "AWS/Lambda",
-                    "Errors",
-                    "FunctionName",
-                    "${CreateBookFunction}",
-                    { "id": "m1", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
-                    "${GetBooksFunction}",
-                    { "id": "m2", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
-                    "${DeleteBookFunction}",
-                    { "id": "m3", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
-                    "${GetBookFunction}",
-                    { "id": "m4", "visible": false, "region": "${AWS::Region}" }
-                  ]
-                ],
-                "view": "singleValue",
-                "region": "${AWS::Region}",
-                "stat": "Sum",
-                "period": 60,
-                "title": "Failed Invocations"
-              }
-            },
-            {
-              "height": 19,
+              "height": 5,
               "width": 12,
-              "y": 13,
-              "x": 12,
-              "type": "metric",
-              "properties": {
-                "view": "pie",
-                "metrics": [
-                  [
-                    "AWS/Lambda",
-                    "Duration",
-                    "FunctionName",
-                    "${CreateBookFunction}",
-                    { "region": "${AWS::Region}", "yAxis": "right" }
-                  ],
-                  [
-                    "...",
-                    "${DeleteBookFunction}",
-                    { "region": "${AWS::Region}", "yAxis": "right" }
-                  ],
-                  [
-                    "...",
-                    "${GetBooksFunction}",
-                    { "region": "${AWS::Region}", "yAxis": "right" }
-                  ],
-                  [
-                    "...",
-                    "${GetBookFunction}",
-                    { "region": "${AWS::Region}", "yAxis": "right" }
-                  ]
-                ],
-                "region": "${AWS::Region}",
-                "legend": {
-                  "position": "bottom"
-                },
-                "labels": {
-                  "visible": true
-                },
-                "title": "Average Execution Duration by Function",
-                "stacked": true,
-                "period": 60
-              }
-            },
-            {
-              "height": 6,
-              "width": 12,
-              "y": 13,
-              "x": 0,
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [
-                    "AWS/Lambda",
-                    "Invocations",
-                    "FunctionName",
-                    "${CreateBookFunction}",
-                    { "region": "${AWS::Region}", "yAxis": "right" }
-                  ],
-                  [
-                    "...",
-                    "${GetBooksFunction}",
-                    { "region": "${AWS::Region}", "yAxis": "right" }
-                  ],
-                  [
-                    "...",
-                    "${DeleteBookFunction}",
-                    { "region": "${AWS::Region}", "yAxis": "right" }
-                  ],
-                  [
-                    "...",
-                    "${GetBookFunction}",
-                    { "region": "${AWS::Region}", "yAxis": "right" }
-                  ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${AWS::Region}",
-                "stat": "Sum",
-                "period": 60,
-                "title": "Invocations by Functions",
-                "yAxis": {
-                  "right": {
-                    "label": "",
-                    "showUnits": false
-                  }
-                },
-                "legend": {
-                  "position": "bottom"
-                }
-              }
-            },
-            {
-              "height": 7,
-              "width": 12,
-              "y": 25,
-              "x": 0,
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [
-                    "AWS/Lambda",
-                    "ConcurrentExecutions",
-                    "FunctionName",
-                    "${CreateBookFunction}",
-                    { "region": "${AWS::Region}", "yAxis": "right" }
-                  ],
-                  [
-                    "...",
-                    "${GetBooksFunction}",
-                    { "region": "${AWS::Region}", "yAxis": "right" }
-                  ],
-                  [
-                    "...",
-                    "${DeleteBookFunction}",
-                    { "region": "${AWS::Region}", "yAxis": "right" }
-                  ],
-                  [
-                    "...",
-                    "${GetBookFunction}",
-                    { "region": "${AWS::Region}", "yAxis": "right" }
-                  ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${AWS::Region}",
-                "stat": "Maximum",
-                "period": 60,
-                "title": "Concurrent Executions by Functions",
-                "yAxis": {
-                  "right": {
-                    "label": "",
-                    "showUnits": false
-                  }
-                },
-                "legend": {
-                  "position": "bottom"
-                }
-              }
-            },
-            {
-              "height": 3,
-              "width": 5,
-              "y": 10,
-              "x": 14,
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [
-                    {
-                      "expression": "SUM(METRICS())",
-                      "label": "",
-                      "id": "e1",
-                      "color": "#ffffff",
-                      "region": "${AWS::Region}"
-                    }
-                  ],
-                  [
-                    "AWS/Lambda",
-                    "Duration",
-                    "FunctionName",
-                    "${CreateBookFunction}",
-                    { "id": "m1", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
-                    "${DeleteBookFunction}",
-                    { "id": "m2", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
-                    "${GetBookFunction}",
-                    { "id": "m3", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
-                    "${GetBooksFunction}",
-                    { "id": "m4", "visible": false, "region": "${AWS::Region}" }
-                  ]
-                ],
-                "view": "singleValue",
-                "region": "${AWS::Region}",
-                "period": 60,
-                "title": "Total Duration",
-                "yAxis": {
-                  "left": {
-                    "showUnits": false
-                  },
-                  "right": {
-                    "label": "percent",
-                    "showUnits": false
-                  }
-                }
-              }
-            },
-            {
-              "height": 3,
-              "width": 5,
-              "y": 10,
-              "x": 19,
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [
-                    {
-                      "expression": "(SUM([m1,m2,m3,m4]) /SUM([m5,m6,m7,m8]))",
-                      "label": "",
-                      "id": "e1",
-                      "color": "#ffffff",
-                      "region": "${AWS::Region}",
-                      "stat": "Sum"
-                    }
-                  ],
-                  [
-                    "AWS/Lambda",
-                    "Duration",
-                    "FunctionName",
-                    "${CreateBookFunction}",
-                    { "id": "m1", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
-                    "${DeleteBookFunction}",
-                    { "id": "m2", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
-                    "${GetBookFunction}",
-                    { "id": "m3", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
-                    "${GetBooksFunction}",
-                    { "id": "m4", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    ".",
-                    "Invocations",
-                    ".",
-                    "${CreateBookFunction}",
-                    { "id": "m5", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
-                    "${DeleteBookFunction}",
-                    { "id": "m6", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
-                    "${GetBooksFunction}",
-                    { "id": "m7", "visible": false, "region": "${AWS::Region}" }
-                  ],
-                  [
-                    "...",
-                    "${GetBookFunction}",
-                    { "id": "m8", "visible": false, "region": "${AWS::Region}" }
-                  ]
-                ],
-                "view": "singleValue",
-                "stacked": false,
-                "region": "${AWS::Region}",
-                "stat": "Sum",
-                "period": 60,
-                "title": "Average Duration (sec)",
-                "yAxis": {
-                  "left": {
-                    "showUnits": false
-                  },
-                  "right": {
-                    "label": "percent",
-                    "showUnits": false
-                  }
-                }
-              }
-            },
-            {
-              "height": 2,
-              "width": 24,
-              "y": 32,
-              "x": 0,
-              "type": "text",
-              "properties": {
-                "markdown": "# DynamoDB"
-              }
-            },
-            {
-              "height": 6,
-              "width": 12,
-              "y": 37,
-              "x": 0,
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [
-                    {
-                      "expression": "m1/PERIOD(m1)",
-                      "label": "Consumed Read Throughput",
-                      "id": "e1",
-                      "region": "${AWS::Region}",
-                      "period": 60
-                    }
-                  ],
-                  [
-                    "AWS/DynamoDB",
-                    "ConsumedReadCapacityUnits",
-                    "TableName",
-                    "${BooksTable}",
-                    { "id": "m1", "visible": false, "region": "${AWS::Region}" }
-                  ]
-                ],
-                "view": "timeSeries",
-                "region": "${AWS::Region}",
-                "stat": "Average",
-                "period": 60,
-                "title": "Consumed Read Throughput",
-                "legend": {
-                  "position": "hidden"
-                },
-                "yAxis": {
-                  "left": {
-                    "showUnits": false
-                  },
-                  "right": {
-                    "showUnits": false
-                  }
-                }
-              }
-            },
-            {
-              "height": 6,
-              "width": 12,
-              "y": 37,
-              "x": 12,
-              "type": "metric",
-              "properties": {
-                "metrics": [
-                  [
-                    {
-                      "expression": "m1/PERIOD(m1)",
-                      "label": "Consumed Read Throughput",
-                      "id": "e1",
-                      "region": "${AWS::Region}",
-                      "period": 60
-                    }
-                  ],
-                  [
-                    "AWS/DynamoDB",
-                    "ConsumedWriteCapacityUnits",
-                    "TableName",
-                    "${BooksTable}",
-                    { "id": "m1", "visible": false, "region": "${AWS::Region}" }
-                  ]
-                ],
-                "view": "timeSeries",
-                "region": "${AWS::Region}",
-                "stat": "Average",
-                "period": 60,
-                "title": "Consumed Write Throughput",
-                "stacked": false,
-                "legend": {
-                  "position": "hidden"
-                },
-                "yAxis": {
-                  "left": {
-                    "showUnits": false
-                  },
-                  "right": {
-                    "showUnits": false
-                  }
-                }
-              }
-            },
-            {
-              "height": 3,
-              "width": 24,
-              "y": 34,
+              "y": 24,
               "x": 0,
               "type": "metric",
               "properties": {
@@ -963,31 +452,123 @@ Resources:
                     "AWS/DynamoDB",
                     "SuccessfulRequestLatency",
                     "TableName",
-                    "apigw-dashboard-not-entries-BooksTable-NPVIDT1YHVON",
+                    "${BooksTable}",
                     "Operation",
-                    "GetItem"
+                    "Scan"
                   ],
-                  ["...", "PutItem"],
                   ["...", "DeleteItem"],
-                  ["...", "Scan"]
+                  ["...", "GetItem"],
+                  ["...", "PutItem"]
                 ],
-                "view": "singleValue",
-                "region": "${AWS::Region}",
-                "stat": "Average",
-                "period": 60,
-                "title": "Latency",
-                "stacked": true,
                 "legend": {
                   "position": "bottom"
                 },
-                "yAxis": {
-                  "left": {
-                    "showUnits": false
-                  },
-                  "right": {
-                    "showUnits": false
-                  }
-                }
+                "region": "${AWS::Region}",
+                "liveData": false,
+                "timezone": "UTC",
+                "title": "SuccessfulRequestLatency: Average",
+                "period": 60,
+                "view": "timeSeries",
+                "stacked": false,
+                "stat": "Average"
+              }
+            },
+            {
+              "height": 5,
+              "width": 12,
+              "y": 24,
+              "x": 12,
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  [
+                    "AWS/DynamoDB",
+                    "ReturnedItemCount",
+                    "TableName",
+                    "${BooksTable}",
+                    "Operation",
+                    "Scan"
+                  ]
+                ],
+                "legend": {
+                  "position": "bottom"
+                },
+                "region": "${AWS::Region}",
+                "liveData": false,
+                "timezone": "UTC",
+                "title": "ReturnedItemCount: Sum",
+                "period": 60,
+                "view": "timeSeries",
+                "stacked": false,
+                "stat": "Sum"
+              }
+            },
+            {
+              "height": 5,
+              "width": 12,
+              "y": 29,
+              "x": 0,
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  [
+                    "AWS/DynamoDB",
+                    "ConsumedReadCapacityUnits",
+                    "TableName",
+                    "${BooksTable}",
+                    { "region": "${AWS::Region}" }
+                  ]
+                ],
+                "legend": {
+                  "position": "bottom"
+                },
+                "region": "${AWS::Region}",
+                "liveData": false,
+                "timezone": "UTC",
+                "title": "ConsumedReadCapacityUnits: Sum",
+                "period": 60,
+                "view": "timeSeries",
+                "stacked": false,
+                "stat": "Sum"
+              }
+            },
+            {
+              "height": 5,
+              "width": 12,
+              "y": 29,
+              "x": 12,
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  [
+                    "AWS/DynamoDB",
+                    "ConsumedWriteCapacityUnits",
+                    "TableName",
+                    "${BooksTable}",
+                    { "region": "${AWS::Region}", "color": "#d62728" }
+                  ]
+                ],
+                "legend": {
+                  "position": "bottom"
+                },
+                "region": "${AWS::Region}",
+                "liveData": false,
+                "timezone": "UTC",
+                "title": "ConsumedWriteCapacityUnits: Sum",
+                "period": 60,
+                "view": "timeSeries",
+                "stacked": false,
+                "stat": "Sum"
+              }
+            },
+            {
+              "height": 2,
+              "width": 24,
+              "y": 22,
+              "x": 0,
+              "type": "text",
+              "properties": {
+                "markdown": "# DynamoDB"
               }
             }
           ]
