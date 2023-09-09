@@ -3,6 +3,12 @@ CUR_DIR = $(shell echo "${PWD}")
 
 .PHONY: unit-tests integration-tests coverage format clean mocks remove-mocks lint
 
+build-HelloFunction:
+	@echo "Building HelloFunction"
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o hello github.com/rotiroti/alessandrina/functions/hello/
+	mv hello $(ARTIFACTS_DIR)
+	@echo "Built HelloFunction successfully"
+
 build-GetBooksFunction:
 	@echo "Building GetBooksFunction"
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o get-books github.com/rotiroti/alessandrina/functions/get-books/

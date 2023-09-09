@@ -34,6 +34,22 @@ Resources:
   BooksTable:
     Type: AWS::Serverless::SimpleTable
 
+  HelloFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      CodeUri: .
+      Handler: hello
+      Description: Hello Alessandrina
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref BooksAPI
+            Path: /hello
+            Method: GET
+
   GetBooksFunction:
     Type: AWS::Serverless::Function
     Metadata:
@@ -636,6 +652,10 @@ Outputs:
   DashboardURL:
     Description: "Dashboard URL"
     Value: !Sub "https://console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards:name=${ApplicationDashboard}"
+
+  HelloFunction:
+    Description: "HelloFunction Lambda Function ARN"
+    Value: !GetAtt HelloFunction.Arn
 
   GetBooksFunction:
     Description: "GetBooks Lambda Function ARN"
