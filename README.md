@@ -208,9 +208,3 @@ PROJECT_ID=<GRAFANA_K6_PROJECT_ID> API_URL=<STACK_WEBPOINT_URL> BOOK_OP=list k6 
 ```shell
 PROJECT_ID=<GRAFANA_K6_PROJECT_ID> API_URL=<STACK_WEBPOINT_URL> BOOK_OP=list k6 run --out cloud ./tests/performance/main.js
 ```
-
-### Generate local HTML report
-
-```shell
-k6 run --out html=./tests/performance/report.html ./tests/performance/main.js
-```
