@@ -278,8 +278,8 @@ Resources:
                     { "region": "${AWS::Region}" }
                   ],
                   ["...", "${GetBooksFunction}", { "region": "${AWS::Region}" }],
-                  ["...", "${CreateBooksFunction}", { "region": "${AWS::Region}" }],
-                  ["...", "${DeleteBooksFunction}", { "region": "${AWS::Region}" }]
+                  ["...", "${CreateBookFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${DeleteBookFunction}", { "region": "${AWS::Region}" }]
                 ],
                 "legend": {
                   "position": "right"
@@ -307,8 +307,8 @@ Resources:
                     { "region": "${AWS::Region}" }
                   ],
                   ["...", "${GetBooksFunction}", { "region": "${AWS::Region}" }],
-                  ["...", "${CreateBooksFunction}", { "region": "${AWS::Region}" }],
-                  ["...", "${DeleteBooksFunction}", { "region": "${AWS::Region}" }]
+                  ["...", "${CreateBookFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${DeleteBookFunction}", { "region": "${AWS::Region}" }]
                 ],
                 "legend": {
                   "position": "right"
@@ -336,8 +336,8 @@ Resources:
                     { "region": "${AWS::Region}" }
                   ],
                   ["...", "${GetBooksFunction}", { "region": "${AWS::Region}" }],
-                  ["...", "${CreateBooksFunction}", { "region": "${AWS::Region}" }],
-                  ["...", "${DeleteBooksFunction}", { "region": "${AWS::Region}" }]
+                  ["...", "${CreateBookFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${DeleteBookFunction}", { "region": "${AWS::Region}" }]
                 ],
                 "legend": {
                   "position": "right"
@@ -365,8 +365,8 @@ Resources:
                     { "region": "${AWS::Region}" }
                   ],
                   ["...", "${GetBooksFunction}", { "region": "${AWS::Region}" }],
-                  ["...", "${CreateBooksFunction}", { "region": "${AWS::Region}" }],
-                  ["...", "${DeleteBooksFunction}", { "region": "${AWS::Region}" }]
+                  ["...", "${CreateBookFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${DeleteBookFunction}", { "region": "${AWS::Region}" }]
                 ],
                 "legend": {
                   "position": "right"
@@ -602,8 +602,8 @@ Resources:
                     "${GetBooksFunction}",
                     { "region": "${AWS::Region}" }
                   ],
-                  ["...", "${CreateBooksFunction}", { "region": "${AWS::Region}" }],
-                  ["...", "${DeleteBooksFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${CreateBookFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${DeleteBookFunction}", { "region": "${AWS::Region}" }],
                   ["...", "${GetBookFunction}", { "region": "${AWS::Region}" }]
                 ],
                 "legend": {
