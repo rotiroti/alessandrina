@@ -5,7 +5,7 @@ const BASE_URL = `${__ENV.API_URL}`.replace(/\/$/, "");
 
 export function handleSummary(data) {
   return {
-    "report.html": htmlReport(data),
+    "general.html": htmlReport(data),
   };
 }
 
@@ -16,8 +16,11 @@ export const options = {
   thresholds: threshold(),
   ext: {
     loadimpact: {
-      projectID: parseInt(__ENV.PROJECT_ID) || 0,
+      projectID: 0,
       name: __ENV.TEST_NAME || "main.js",
+      distribution: {
+        "us-east-1": { loadZone: "amazon:us:ashburn", percent: 100 },
+      },
     },
   },
 };

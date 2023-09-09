@@ -49,10 +49,11 @@ export const averageWorkload = {
 
 export const constantRateWorkload = {
   executor: "constant-arrival-rate",
-  duration: "30s",
-  preAllocatedVUs: 20, // allocate runtime resources
-  rate: 10, // number of constant iterations given `timeUnit`
+  rate: 10,
+  preAllocatedVUs: 10,
+  maxVUs: 20,
   timeUnit: "1s",
+  duration: "30s",
 };
 
 export function workload() {
@@ -68,6 +69,10 @@ export function workload() {
     default:
       return smokeWorkload;
   }
+}
+
+function isConstantRateWorkload() {
+  return parseInt(__ENV.WORKLOAD) === CONSTANT_RATE;
 }
 
 /**
@@ -104,7 +109,9 @@ export function create(baseUrl) {
     CreateErrors.add(1);
   CreateTrend.add(res.timings.duration);
 
-  sleep(0.5);
+  if (!isConstantRateWorkload()) {
+    sleep(1);
+  }
 }
 
 /**
@@ -118,7 +125,10 @@ export function list(baseUrl) {
   check(res, { "Retrieve list of books": (r) => r.status === 200 }) ||
     ListErrors.add(1);
   ListTrend.add(res.timings.duration);
-  sleep(0.5);
+
+  if (!isConstantRateWorkload()) {
+    sleep(1);
+  }
 }
 
 /**
@@ -143,21 +153,19 @@ export function flow(baseUrl) {
       CreateErrors.add(1);
     CreateTrend.add(res.timings.duration);
 
-    sleep(0.5);
-
     const getRes = http.get(`${baseUrl}/books/${res.json("id")}`);
 
     check(getRes, { "Show book": (r) => r.status === 200 }) ||
       ShowErrors.add(1);
     ShowTrend.add(getRes.timings.duration);
 
-    sleep(0.5);
-
     const delRes = http.del(`${baseUrl}/books/${res.json("id")}`, null, params);
     check(delRes, { "Book was deleted correctly": (r) => r.status === 204 }) ||
       DeleteErrors.add(1);
     DeleteTrend.add(delRes.timings.duration);
 
-    sleep(0.5);
+    if (!isConstantRateWorkload()) {
+      sleep(1);
+    }
   });
 }
