@@ -178,9 +178,6 @@ WORKLOAD=0
 # Set the book operation (mandatory, possible values: list|create|flow)
 BOOK_OP=list
 
-# Set the project ID (mandatory when running on the cloud)
-PROJECT_ID=<GRAFANA_K6_PROJECT_ID>
-
 # Set the test name (default: main.js)
 TEST_NAME=smoke-create
 ```
@@ -200,11 +197,22 @@ k6 login cloud --token <PERSONAL_API_TOKEN>
 ### Run a test in the cloud
 
 ```shell
-PROJECT_ID=<GRAFANA_K6_PROJECT_ID> API_URL=<STACK_WEBPOINT_URL> BOOK_OP=list k6 cloud ./tests/performance/main.js
+./k6 cloud -e K6_CLOUD_PROJECT_ID=<PROJECT_ID> \
+  -e API_URL=<STACK_WEBPOINT_URL> \
+  -e TEST_NAME=<TEST_NAME> \
+  -e BOOK_OP=<BOOK_OP> \
+  ./tests/performance/main.js
 ```
 
 ### Run a test locally and stream the results to Grafana Cloud
 
 ```shell
-PROJECT_ID=<GRAFANA_K6_PROJECT_ID> API_URL=<STACK_WEBPOINT_URL> BOOK_OP=list k6 run --out cloud ./tests/performance/main.js
+./k6 run -e K6_CLOUD_PROJECT_ID=<PROJECT_ID>\
+  -e API_URL=<STACK_WEBPOINT_URL> \
+  -e TEST_NAME=<TEST_NAME> \
+  -e BOOK_OP=<BOOK_OP=<BOOK_OP> \
+  -e WORKLOAD=<WORKLOAD> \
+  --out cloud \
+  --out dashboard=report=<REPORT_NAME>.html \
+  ./tests/performance/main.js
 ```
