@@ -167,69 +167,35 @@ Resources:
         {
           "widgets": [
             {
-              "height": 5,
-              "width": 8,
+              "height": 3,
+              "width": 6,
               "y": 2,
               "x": 0,
               "type": "metric",
               "properties": {
+                "metrics": [
+                  [
+                    "AWS/ApiGateway",
+                    "Count",
+                    "ApiId",
+                    "${BooksAPI}",
+                    { "region": "${AWS::Region}", "label": "Requests" }
+                  ]
+                ],
                 "legend": {
                   "position": "hidden"
                 },
                 "region": "${AWS::Region}",
-                "liveData": false,
                 "period": 60,
-                "timezone": "UTC",
-                "title": "Count: Sum",
-                "view": "timeSeries",
-                "stacked": false,
-                "metrics": [["AWS/ApiGateway", "Count", "ApiId", "${BooksAPI}"]]
-              }
-            },
-            {
-              "height": 5,
-              "width": 8,
-              "y": 2,
-              "x": 8,
-              "type": "metric",
-              "properties": {
-                "legend": {
-                  "position": "hidden"
-                },
-                "region": "${AWS::Region}",
-                "liveData": false,
-                "period": 60,
-                "timezone": "UTC",
-                "title": "5XXError: Sum",
-                "view": "timeSeries",
-                "stacked": false,
-                "metrics": [["AWS/ApiGateway", "5xx", "ApiId", "${BooksAPI}"]]
-              }
-            },
-            {
-              "height": 5,
-              "width": 8,
-              "y": 2,
-              "x": 16,
-              "type": "metric",
-              "properties": {
-                "legend": {
-                  "position": "hidden"
-                },
-                "region": "${AWS::Region}",
-                "liveData": false,
-                "period": 60,
-                "timezone": "UTC",
-                "title": "4XXError: Sum",
-                "view": "timeSeries",
-                "stacked": false,
-                "metrics": [["AWS/ApiGateway", "4xx", "ApiId", "${BooksAPI}"]]
+                "title": "Total Requests: Sum",
+                "view": "singleValue",
+                "stat": "Sum"
               }
             },
             {
               "height": 5,
               "width": 12,
-              "y": 7,
+              "y": 5,
               "x": 0,
               "type": "metric",
               "properties": {
@@ -251,18 +217,15 @@ Resources:
                   "position": "bottom"
                 },
                 "region": "${AWS::Region}",
-                "liveData": false,
                 "period": 60,
-                "timezone": "UTC",
                 "title": "Latencies: percentiles",
-                "view": "timeSeries",
-                "stacked": false
+                "view": "timeSeries"
               }
             },
             {
               "height": 5,
               "width": 12,
-              "y": 7,
+              "y": 5,
               "x": 12,
               "type": "metric",
               "properties": {
@@ -284,12 +247,9 @@ Resources:
                   "position": "bottom"
                 },
                 "region": "${AWS::Region}",
-                "liveData": false,
                 "period": 60,
-                "timezone": "UTC",
                 "title": "Integration Latencies: percentiles",
-                "view": "timeSeries",
-                "stacked": false
+                "view": "timeSeries"
               }
             },
             {
@@ -303,9 +263,9 @@ Resources:
               }
             },
             {
-              "height": 4,
-              "width": 12,
-              "y": 14,
+              "height": 3,
+              "width": 24,
+              "y": 12,
               "x": 0,
               "type": "metric",
               "properties": {
@@ -318,27 +278,24 @@ Resources:
                     { "region": "${AWS::Region}" }
                   ],
                   ["...", "${GetBooksFunction}", { "region": "${AWS::Region}" }],
-                  ["...", "${CreateBookFunction}", { "region": "${AWS::Region}" }],
-                  ["...", "${DeleteBookFunction}", { "region": "${AWS::Region}" }]
+                  ["...", "${CreateBooksFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${DeleteBooksFunction}", { "region": "${AWS::Region}" }]
                 ],
                 "legend": {
                   "position": "right"
                 },
                 "region": "${AWS::Region}",
-                "liveData": false,
-                "timezone": "UTC",
                 "title": "Invocations: Sum",
                 "period": 60,
-                "view": "timeSeries",
-                "stacked": false,
+                "view": "singleValue",
                 "stat": "Sum"
               }
             },
             {
               "height": 4,
               "width": 12,
-              "y": 14,
-              "x": 12,
+              "y": 15,
+              "x": 0,
               "type": "metric",
               "properties": {
                 "metrics": [
@@ -350,27 +307,24 @@ Resources:
                     { "region": "${AWS::Region}" }
                   ],
                   ["...", "${GetBooksFunction}", { "region": "${AWS::Region}" }],
-                  ["...", "${CreateBookFunction}", { "region": "${AWS::Region}" }],
-                  ["...", "${DeleteBookFunction}", { "region": "${AWS::Region}" }]
+                  ["...", "${CreateBooksFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${DeleteBooksFunction}", { "region": "${AWS::Region}" }]
                 ],
                 "legend": {
                   "position": "right"
                 },
                 "region": "${AWS::Region}",
-                "liveData": false,
-                "timezone": "UTC",
                 "title": "Duration: Average",
                 "period": 60,
                 "view": "timeSeries",
-                "stacked": false,
                 "stat": "Average"
               }
             },
             {
               "height": 4,
               "width": 12,
-              "y": 18,
-              "x": 0,
+              "y": 15,
+              "x": 12,
               "type": "metric",
               "properties": {
                 "metrics": [
@@ -382,26 +336,23 @@ Resources:
                     { "region": "${AWS::Region}" }
                   ],
                   ["...", "${GetBooksFunction}", { "region": "${AWS::Region}" }],
-                  ["...", "${CreateBookFunction}", { "region": "${AWS::Region}" }],
-                  ["...", "${DeleteBookFunction}", { "region": "${AWS::Region}" }]
+                  ["...", "${CreateBooksFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${DeleteBooksFunction}", { "region": "${AWS::Region}" }]
                 ],
                 "legend": {
                   "position": "right"
                 },
                 "region": "${AWS::Region}",
-                "liveData": false,
-                "timezone": "UTC",
                 "title": "Errors: Sum",
                 "period": 60,
                 "view": "timeSeries",
-                "stacked": false,
                 "stat": "Sum"
               }
             },
             {
               "height": 4,
               "width": 12,
-              "y": 18,
+              "y": 19,
               "x": 12,
               "type": "metric",
               "properties": {
@@ -414,26 +365,23 @@ Resources:
                     { "region": "${AWS::Region}" }
                   ],
                   ["...", "${GetBooksFunction}", { "region": "${AWS::Region}" }],
-                  ["...", "${CreateBookFunction}", { "region": "${AWS::Region}" }],
-                  ["...", "${DeleteBookFunction}", { "region": "${AWS::Region}" }]
+                  ["...", "${CreateBooksFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${DeleteBooksFunction}", { "region": "${AWS::Region}" }]
                 ],
                 "legend": {
                   "position": "right"
                 },
                 "region": "${AWS::Region}",
-                "liveData": false,
-                "timezone": "UTC",
                 "title": "Throttles: Sum",
                 "period": 60,
                 "view": "timeSeries",
-                "stacked": false,
                 "stat": "Sum"
               }
             },
             {
               "height": 2,
               "width": 24,
-              "y": 12,
+              "y": 10,
               "x": 0,
               "type": "text",
               "properties": {
@@ -443,7 +391,7 @@ Resources:
             {
               "height": 5,
               "width": 12,
-              "y": 24,
+              "y": 25,
               "x": 0,
               "type": "metric",
               "properties": {
@@ -454,29 +402,27 @@ Resources:
                     "TableName",
                     "${BooksTable}",
                     "Operation",
-                    "Scan"
+                    "Scan",
+                    { "region": "${AWS::Region}" }
                   ],
-                  ["...", "DeleteItem"],
-                  ["...", "GetItem"],
-                  ["...", "PutItem"]
+                  ["...", "DeleteItem", { "region": "${AWS::Region}" }],
+                  ["...", "GetItem", { "region": "${AWS::Region}" }],
+                  ["...", "PutItem", { "region": "${AWS::Region}" }]
                 ],
                 "legend": {
                   "position": "bottom"
                 },
                 "region": "${AWS::Region}",
-                "liveData": false,
-                "timezone": "UTC",
                 "title": "SuccessfulRequestLatency: Average",
                 "period": 60,
                 "view": "timeSeries",
-                "stacked": false,
                 "stat": "Average"
               }
             },
             {
               "height": 5,
               "width": 12,
-              "y": 24,
+              "y": 25,
               "x": 12,
               "type": "metric",
               "properties": {
@@ -487,26 +433,24 @@ Resources:
                     "TableName",
                     "${BooksTable}",
                     "Operation",
-                    "Scan"
+                    "Scan",
+                    { "region": "${AWS::Region}" }
                   ]
                 ],
                 "legend": {
                   "position": "bottom"
                 },
                 "region": "${AWS::Region}",
-                "liveData": false,
-                "timezone": "UTC",
                 "title": "ReturnedItemCount: Sum",
                 "period": 60,
                 "view": "timeSeries",
-                "stacked": false,
                 "stat": "Sum"
               }
             },
             {
               "height": 5,
               "width": 12,
-              "y": 29,
+              "y": 30,
               "x": 0,
               "type": "metric",
               "properties": {
@@ -523,19 +467,16 @@ Resources:
                   "position": "bottom"
                 },
                 "region": "${AWS::Region}",
-                "liveData": false,
-                "timezone": "UTC",
                 "title": "ConsumedReadCapacityUnits: Sum",
                 "period": 60,
                 "view": "timeSeries",
-                "stacked": false,
                 "stat": "Sum"
               }
             },
             {
               "height": 5,
               "width": 12,
-              "y": 29,
+              "y": 30,
               "x": 12,
               "type": "metric",
               "properties": {
@@ -552,23 +493,149 @@ Resources:
                   "position": "bottom"
                 },
                 "region": "${AWS::Region}",
-                "liveData": false,
-                "timezone": "UTC",
                 "title": "ConsumedWriteCapacityUnits: Sum",
                 "period": 60,
                 "view": "timeSeries",
-                "stacked": false,
                 "stat": "Sum"
               }
             },
             {
               "height": 2,
               "width": 24,
-              "y": 22,
+              "y": 23,
               "x": 0,
               "type": "text",
               "properties": {
                 "markdown": "# DynamoDB"
+              }
+            },
+            {
+              "height": 3,
+              "width": 6,
+              "y": 2,
+              "x": 12,
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  [
+                    {
+                      "expression": "100*(m1/m2)",
+                      "label": "Error Rate",
+                      "id": "e1",
+                      "region": "${AWS::Region}",
+                      "color": "#1f77b4"
+                    }
+                  ],
+                  [
+                    "AWS/ApiGateway",
+                    "5xx",
+                    "ApiId",
+                    "${BooksAPI}",
+                    { "region": "${AWS::Region}", "id": "m1", "visible": false }
+                  ],
+                  [
+                    ".",
+                    "Count",
+                    ".",
+                    ".",
+                    { "region": "${AWS::Region}", "id": "m2", "visible": false }
+                  ]
+                ],
+                "view": "singleValue",
+                "region": "${AWS::Region}",
+                "stat": "Sum",
+                "period": 60,
+                "title": "5xx Error: %"
+              }
+            },
+            {
+              "height": 3,
+              "width": 6,
+              "y": 2,
+              "x": 18,
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  [
+                    {
+                      "expression": "100*(m1/m2)",
+                      "label": "Error Rate",
+                      "id": "e1",
+                      "region": "${AWS::Region}",
+                      "color": "#1f77b4"
+                    }
+                  ],
+                  [
+                    "AWS/ApiGateway",
+                    "4xx",
+                    "ApiId",
+                    "${BooksAPI}",
+                    { "region": "${AWS::Region}", "id": "m1", "visible": false }
+                  ],
+                  [
+                    ".",
+                    "Count",
+                    ".",
+                    ".",
+                    { "region": "${AWS::Region}", "id": "m2", "visible": false }
+                  ]
+                ],
+                "view": "singleValue",
+                "region": "${AWS::Region}",
+                "stat": "Sum",
+                "period": 60,
+                "title": "4xx Error: %"
+              }
+            },
+            {
+              "height": 4,
+              "width": 12,
+              "y": 19,
+              "x": 0,
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  [
+                    "AWS/Lambda",
+                    "ConcurrentExecutions",
+                    "FunctionName",
+                    "${GetBooksFunction}",
+                    { "region": "${AWS::Region}" }
+                  ],
+                  ["...", "${CreateBooksFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${DeleteBooksFunction}", { "region": "${AWS::Region}" }],
+                  ["...", "${GetBookFunction}", { "region": "${AWS::Region}" }]
+                ],
+                "legend": {
+                  "position": "right"
+                },
+                "region": "${AWS::Region}",
+                "title": "Concurrent Executions: Sum",
+                "period": 60,
+                "view": "timeSeries",
+                "stat": "Sum"
+              }
+            },
+            {
+              "height": 3,
+              "width": 6,
+              "y": 2,
+              "x": 6,
+              "type": "metric",
+              "properties": {
+                "view": "singleValue",
+                "metrics": [
+                  [
+                    "AWS/ApiGateway",
+                    "Latency",
+                    "ApiId",
+                    "${BooksAPI}",
+                    { "region": "${AWS::Region}" }
+                  ]
+                ],
+                "region": "${AWS::Region}",
+                "title": "Latency: Average",
+                "period": 60
               }
             }
           ]
