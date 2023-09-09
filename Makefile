@@ -27,6 +27,12 @@ build-DeleteBookFunction:
 	mv delete-book $(ARTIFACTS_DIR)
 	@echo "Built DeleteBookFunction successfully"
 
+build-k6:
+	@echo "Building k6 tool"
+	go install go.k6.io/xk6/cmd/xk6@latest
+	xk6 build --with github.com/grafana/xk6-dashboard@latest
+	@echo "Built k6 successfully"
+
 format:
 	@echo "Format code"
 	go fmt ./...
@@ -59,4 +65,6 @@ remove-mocks:
 clean:
 	@echo "Clean up"
 	rm -f coverage.*
+	rm -f report.*
 	rm -fr .aws-sam
+	rm -f ./k6

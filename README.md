@@ -14,7 +14,7 @@ To set up and run this serverless application locally or in a cloud environment,
 - [Go Programming Language](https://go.dev)
 - [GNU Make](https://www.gnu.org/software/make)
 - [Docker](https://www.docker.com)
-- [Artillery](https://artillery.io)
+- [k6](https://k6.io/)
 - [Localstack](https://localstack.cloud) (required only for running AWS DynamoDB locally)
 
 Once you have these prerequisites, you can set up and run the serverless application locally or deploy it to your preferred cloud environment.
@@ -81,7 +81,7 @@ sam local invoke CreateBookFunction \
 
 This folder contains shell scripts to perform migrations when running DynamoDB on Localstack.
 
-## Environment Variables
+## Environment Variables for SAM
 
 The serverless application can be configured via some environment variables.
 
@@ -130,7 +130,7 @@ make clean
 
 The integration tests assume that you have already installed all the requirements mentioned in the "Requirements" section.
 
-### SAM Local API + Localstack DynamoDB
+### Running on SAM Local API + Localstack DynamoDB
 
 ```shell
 # 1. Create a Docker network
@@ -152,12 +152,65 @@ sam local start-api --docker-network alessandrina --warm-containers LAZY --env-v
 make integration-tests
 ```
 
-### Deployed Environment (feature,dev or prod)
+### Running on AWS (feature, dev, prod branches)
 
 ```shell
 # 1. Build the serverless application
 sam build --parallel
 
 # 2. Run integration tests
-make integration-tests API_URL=<DEPLOYED_STACK_API_URL>
+make integration-tests API_URL=<STACK_WEBPOINT_URL>
+```
+
+## Performance Tests
+
+The performance tests assume that you have already installed all the requirements mentioned in the "Requirements" section.
+
+### Environment Variables for k6
+
+```shell
+# Set the API URL (mandatory)
+API_URL=<STACK_WEBPOINT_URL>
+
+# Set the workload (possible values: 0|1|2, default: 0)
+WORKLOAD=0
+
+# Set the book operation (mandatory, possible values: list|create|flow)
+BOOK_OP=list
+
+# Set the project ID (mandatory when running on the cloud)
+PROJECT_ID=<GRAFANA_K6_PROJECT_ID>
+
+# Set the test name (default: main.js)
+TEST_NAME=smoke-create
+```
+
+### Run a test locally
+
+```shell
+API_URL=<STACK_WEBPOINT_URL> BOOK_OP=list k6 run ./tests/performance/main.js
+```
+
+#### Authenticate with Grafana Cloud
+
+```shell
+k6 login cloud --token <PERSONAL_API_TOKEN>
+```
+
+### Run a test in the cloud
+
+```shell
+PROJECT_ID=<GRAFANA_K6_PROJECT_ID> API_URL=<STACK_WEBPOINT_URL> BOOK_OP=list k6 cloud ./tests/performance/main.js
+```
+
+### Run a test locally and stream the results to Grafana Cloud
+
+```shell
+PROJECT_ID=<GRAFANA_K6_PROJECT_ID> API_URL=<STACK_WEBPOINT_URL> BOOK_OP=list k6 run --out cloud ./tests/performance/main.js
+```
+
+### Generate local HTML report
+
+```shell
+k6 run --out html=./tests/performance/report.html ./tests/performance/main.js
 ```

@@ -28,8 +28,9 @@ env*
 # VS Code project files
 .vscode/
 
-# Output of the Artillery.io tool.
-report.json*
-
 # Mac OS X Finder
 .DS_Store
+
+# Grafana k6 binary and report
+k6
+report.html
