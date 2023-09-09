@@ -3,7 +3,6 @@ Transform: AWS::Serverless-2016-10-31
 Description: SAM Template for Alessandrina serverless application.
 Globals:
   Function:
-    Timeout: 10
     Runtime: go1.x
     Architectures: [x86_64]
     Environment:
@@ -33,22 +32,13 @@ Resources:
       RetentionInDays: 7
 
   BooksTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-      AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
-      BillingMode: PAY_PER_REQUEST
+    Type: AWS::Serverless::SimpleTable
 
   GetBooksFunction:
     Type: AWS::Serverless::Function
     Metadata:
       BuildMethod: makefile
     Properties:
-      MemorySize: 128
       CodeUri: .
       Handler: get-books
       Description: Retrieve all books
@@ -77,7 +67,6 @@ Resources:
     Metadata:
       BuildMethod: makefile
     Properties:
-      MemorySize: 256
       CodeUri: .
       Handler: get-book
       Description: Retrieve a book
@@ -106,7 +95,6 @@ Resources:
     Metadata:
       BuildMethod: makefile
     Properties:
-      MemorySize: 128
       CodeUri: .
       Handler: create-book
       Description: Create a new book
@@ -135,7 +123,6 @@ Resources:
     Metadata:
       BuildMethod: makefile
     Properties:
-      MemorySize: 128
       CodeUri: .
       Handler: delete-book
       Description: Delete a book
