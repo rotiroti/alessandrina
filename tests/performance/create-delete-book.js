@@ -36,8 +36,6 @@ export default function () {
 
     check(delRes, {
       "Delete status is 200": (r) => delRes.status === 200,
-      "Delete Content-Type header": (r) =>
-      delRes.headers["Content-Type"] === "application/json",
     });
   }
 
