@@ -3,12 +3,6 @@ CUR_DIR = $(shell echo "${PWD}")
 
 .PHONY: unit-tests integration-tests coverage format clean mocks remove-mocks lint
 
-build-HelloFunction:
-	@echo "Building HelloFunction"
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o hello github.com/rotiroti/alessandrina/functions/hello/
-	mv hello $(ARTIFACTS_DIR)
-	@echo "Built HelloFunction successfully"
-
 build-GetBooksFunction:
 	@echo "Building GetBooksFunction"
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o get-books github.com/rotiroti/alessandrina/functions/get-books/
@@ -36,7 +30,7 @@ build-DeleteBookFunction:
 build-k6:
 	@echo "Building k6 tool"
 	go install go.k6.io/xk6/cmd/xk6@latest
-	xk6 build --with github.com/grafana/xk6-dashboard@latest
+	xk6 build --with github.com/grafana/xk6-dashboard@v0.5.4
 	@echo "Built k6 successfully"
 
 format:
@@ -70,7 +64,7 @@ remove-mocks:
 
 clean:
 	@echo "Clean up"
-	rm -f coverage.*
-	rm -f report.*
+	rm -f *.html
+	rm -f *.out
 	rm -fr .aws-sam
 	rm -f ./k6
