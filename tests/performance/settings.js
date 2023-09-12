@@ -102,11 +102,26 @@ const rate25 = {
   },
 };
 
+const averageRate = {
+  averageRate: {
+    executor: "ramping-arrival-rate",
+    startRate: 0,
+    timeUnit: "1s",
+    preAllocatedVUs: 15,
+    stages: [
+      { duration: "1m", target: 10 },
+      { duration: "3m30s", target: 10 },
+      { duration: "30s", target: 0 },
+    ],
+  },
+};
+
 const stressRate = {
   stressRate: {
     executor: "ramping-arrival-rate",
     startRate: 0,
     timeUnit: "1s",
+    preAllocatedVUs: 30,
     stages: [
       { duration: "1m", target: 5 },
       { duration: "2m30s", target: 5 },
@@ -127,7 +142,8 @@ const workloads = {
   1: rate5,
   2: rate10,
   3: rate25,
-  4: stressRate,
+  4: averageRate,
+  5: stressRate,
 };
 
 /**
@@ -138,7 +154,8 @@ const workloadNames = {
   1: "rate5",
   2: "rate10",
   3: "rate25",
-  4: "stressRate",
+  4: "averageRate",
+  5: "stressRate",
 };
 
 /**
