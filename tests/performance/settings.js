@@ -1,4 +1,10 @@
+import { Trend } from "k6/metrics";
 import { SharedArray } from "k6/data";
+
+// Create custom trend metrics
+export const createBookLatency = new Trend("create_book_duration");
+export const getBookLatency = new Trend("get_book_duration");
+export const deleteBookLatency = new Trend("delete_book_duration");
 
 /**
  * Base URL of the Alessandrina API.
@@ -60,6 +66,59 @@ const baseline = {
     executor: "per-vu-iterations",
     vus: 3,
     iterations: 10,
+    maxDuration: "30s",
+  },
+};
+
+const vus5 = {
+  vus5: {
+    executor: "constant-vus",
+    vus: 5,
+    duration: "1m",
+  },
+};
+
+const vus10 = {
+  vus10: {
+    executor: "constant-vus",
+    vus: 10,
+    duration: "1m",
+  },
+};
+
+const vus15 = {
+  vus15: {
+    executor: "constant-vus",
+    vus: 15,
+    duration: "1m",
+  },
+};
+
+const averageVUs = {
+  averageVUs: {
+    executor: "ramping-vus",
+    startVUs: 0,
+    stages: [
+      { duration: "10s", target: 10 },
+      { duration: "1m40s", target: 10 },
+      { duration: "10s", target: 0 },
+    ],
+  },
+};
+
+const stressVUs = {
+  stressVUs: {
+    executor: "ramping-vus",
+    startVUs: 0,
+    stages: [
+      { duration: "1m", target: 5 },
+      { duration: "2m30s", target: 5 },
+      { duration: "30s", target: 10 },
+      { duration: "2m30s", target: 10 },
+      { duration: "30s", target: 15 },
+      { duration: "2m30s", target: 15 },
+      { duration: "30s", target: 0 },
+    ],
   },
 };
 
@@ -79,7 +138,7 @@ const rate10 = {
     rate: 10,
     timeUnit: "1s",
     duration: "5m",
-    preAllocatedVUs: 15,
+    preAllocatedVUs: 30,
   },
 };
 
@@ -89,7 +148,7 @@ const rate25 = {
     rate: 25,
     timeUnit: "1s",
     duration: "5m",
-    preAllocatedVUs: 30,
+    preAllocatedVUs: 50,
   },
 };
 
@@ -98,7 +157,7 @@ const averageRate = {
     executor: "ramping-arrival-rate",
     startRate: 0,
     timeUnit: "1s",
-    preAllocatedVUs: 15,
+    preAllocatedVUs: 30,
     stages: [
       { duration: "1m", target: 10 },
       { duration: "3m30s", target: 10 },
@@ -112,7 +171,7 @@ const stressRate = {
     executor: "ramping-arrival-rate",
     startRate: 0,
     timeUnit: "1s",
-    preAllocatedVUs: 30,
+    preAllocatedVUs: 50,
     stages: [
       { duration: "1m", target: 5 },
       { duration: "2m30s", target: 5 },
@@ -130,11 +189,16 @@ const stressRate = {
  */
 const workloads = {
   0: baseline,
-  1: rate5,
-  2: rate10,
-  3: rate25,
-  4: averageRate,
-  5: stressRate,
+  1: vus5,
+  2: vus10,
+  3: vus15,
+  4: averageVUs,
+  5: stressVUs,
+  6: rate5,
+  7: rate10,
+  8: rate25,
+  9: averageRate,
+  10: stressRate,
 };
 
 /**
@@ -142,11 +206,16 @@ const workloads = {
  */
 const workloadNames = {
   0: "baseline",
-  1: "rate5",
-  2: "rate10",
-  3: "rate25",
-  4: "averageRate",
-  5: "stressRate",
+  1: "vus5",
+  2: "vus10",
+  3: "vus15",
+  4: "averageVUs",
+  5: "stressVUs",
+  6: "rate5",
+  7: "rate10",
+  8: "rate25",
+  9: "averageRate",
+  10: "stressRate",
 };
 
 /**

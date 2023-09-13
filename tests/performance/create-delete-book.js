@@ -22,6 +22,8 @@ export default function () {
   };
   const res = http.post(`${settings.BASE_URL}/books`, payload, params);
 
+  settings.createBookLatency.add(res.timings.duration);
+
   check(res, {
     "Post status is 201": (r) => res.status === 201,
     "Post Content-Type header": (r) =>
@@ -35,15 +37,18 @@ export default function () {
       tags: { name: "delete-book" },
     });
 
+    settings.deleteBookLatency.add(delRes.timings.duration);
+
     check(delRes, {
       "Delete status is 200": (r) => delRes.status === 200,
     });
   }
 
-  if (
-    `${exec.scenario.executor}` !== "constant-arrival-rate" &&
-    `${exec.scenario.executor}` !== "ramping-arrival-rate"
-  ) {
+  const isRateScenario =
+    `${exec.scenario.executor}` === "constant-arrival-rate" ||
+    `${exec.scenario.executor}` === "ramping-arrival-rate";
+
+  if (!isRateScenario) {
     sleep(0.5);
   }
 }

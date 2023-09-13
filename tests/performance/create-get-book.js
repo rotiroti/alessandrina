@@ -19,6 +19,8 @@ export default function () {
   };
   const res = http.post(`${settings.BASE_URL}/books`, payload, params);
 
+  settings.createBookLatency.add(res.timings.duration);
+
   check(res, {
     "Post status is 201": (r) => res.status === 201,
     "Post Content-Type header": (r) =>
@@ -31,6 +33,8 @@ export default function () {
       tags: { name: "get-book" },
     });
 
+    settings.getBookLatency.add(getRes.timings.duration);
+
     check(getRes, {
       "Get status is 200": (r) => getRes.status === 200,
       "Get Content-Type header": (r) =>
@@ -38,10 +42,11 @@ export default function () {
     });
   }
 
-  if (
-    `${exec.scenario.executor}` !== "constant-arrival-rate" &&
-    `${exec.scenario.executor}` !== "ramping-arrival-rate"
-  ) {
+  const isRateScenario =
+    `${exec.scenario.executor}` === "constant-arrival-rate" ||
+    `${exec.scenario.executor}` === "ramping-arrival-rate";
+
+  if (!isRateScenario) {
     sleep(0.5);
   }
 }

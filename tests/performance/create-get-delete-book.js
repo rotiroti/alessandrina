@@ -17,11 +17,10 @@ export default function () {
 
     const headers = { "Content-Type": "application/json" };
     const payload = JSON.stringify(settings.generateRandomPayload());
-    const params = {
-      headers: headers,
-      tags: { name: "create-book" },
-    };
+    const params = { headers: headers, tags: { name: "create-book" } };
     const res = http.post(URL, payload, params);
+
+    settings.createBookLatency.add(res.timings.duration);
 
     check(res, {
       "Post status is 201": (r) => res.status === 201,
@@ -36,6 +35,8 @@ export default function () {
         tags: { name: "get-book" },
       });
 
+      settings.getBookLatency.add(getRes.timings.duration);
+
       check(getRes, {
         "Get status is 200": (r) => getRes.status === 200,
         "Get Content-Type header": (r) =>
@@ -47,16 +48,19 @@ export default function () {
         tags: { name: "delete-book" },
       });
 
+      settings.deleteBookLatency.add(delRes.timings.duration);
+
       check(delRes, {
         "Delete status is 204": (r) => delRes.status === 204,
       });
     }
   });
 
-  if (
-    `${exec.scenario.executor}` !== "constant-arrival-rate" &&
-    `${exec.scenario.executor}` !== "ramping-arrival-rate"
-  ) {
+  const isRateScenario =
+    `${exec.scenario.executor}` === "constant-arrival-rate" ||
+    `${exec.scenario.executor}` === "ramping-arrival-rate";
+
+  if (!isRateScenario) {
     sleep(0.5);
   }
 }

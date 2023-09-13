@@ -22,10 +22,11 @@ export default function () {
       res.headers["Content-Type"] === "application/json",
   });
 
-  if (
-    `${exec.scenario.executor}` !== "constant-arrival-rate" &&
-    `${exec.scenario.executor}` !== "ramping-arrival-rate"
-  ) {
+  const isRateScenario =
+    `${exec.scenario.executor}` === "constant-arrival-rate" ||
+    `${exec.scenario.executor}` === "ramping-arrival-rate";
+
+  if (!isRateScenario) {
     sleep(0.5);
   }
 }
