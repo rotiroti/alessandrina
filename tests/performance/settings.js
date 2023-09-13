@@ -38,15 +38,6 @@ export const generateRandomPayload = () => {
 };
 
 /**
- * Check if the current scenario does not require a sleep.
- */
-export const noSleep = () => {
-  const s = __ENV.NO_SLEEP || "false";
-
-  return s.toLowerCase() === "true";
-};
-
-/**
  * Configure the cloud execution.
  *
  * @param {*} testName

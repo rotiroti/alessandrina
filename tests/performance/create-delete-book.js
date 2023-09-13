@@ -1,4 +1,5 @@
 import http from "k6/http";
+import exec from "k6/execution";
 import { check, sleep } from "k6";
 import * as settings from "./settings.js";
 
@@ -39,7 +40,10 @@ export default function () {
     });
   }
 
-  if (!settings.noSleep()) {
+  if (
+    `${exec.scenario.executor}` !== "constant-arrival-rate" &&
+    `${exec.scenario.executor}` !== "ramping-arrival-rate"
+  ) {
     sleep(0.5);
   }
 }

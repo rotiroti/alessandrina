@@ -1,4 +1,5 @@
 import http from "k6/http";
+import exec from "k6/execution";
 import { check, group, sleep } from "k6";
 import * as settings from "./settings.js";
 
@@ -18,10 +19,10 @@ export default function () {
     const payload = JSON.stringify(settings.generateRandomPayload());
     const params = {
       headers: headers,
-      tags: { name: "create-book"},
+      tags: { name: "create-book" },
     };
     const res = http.post(URL, payload, params);
-  
+
     check(res, {
       "Post status is 201": (r) => res.status === 201,
       "Post Content-Type header": (r) =>
@@ -38,7 +39,7 @@ export default function () {
       check(getRes, {
         "Get status is 200": (r) => getRes.status === 200,
         "Get Content-Type header": (r) =>
-        getRes.headers["Content-Type"] === "application/json",
+          getRes.headers["Content-Type"] === "application/json",
       });
 
       const delRes = http.del(`${URL}/${bookId}`, null, {
@@ -52,7 +53,10 @@ export default function () {
     }
   });
 
-  if (!settings.noSleep()) {
+  if (
+    `${exec.scenario.executor}` !== "constant-arrival-rate" &&
+    `${exec.scenario.executor}` !== "ramping-arrival-rate"
+  ) {
     sleep(0.5);
   }
 }
