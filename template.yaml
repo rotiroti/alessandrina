@@ -428,10 +428,10 @@ Resources:
                   "position": "bottom"
                 },
                 "region": "${AWS::Region}",
-                "title": "ReturnedItemCount: Sum",
+                "title": "ReturnedItemCount: Average",
                 "period": 60,
                 "view": "timeSeries",
-                "stat": "Sum"
+                "stat": "Average"
               }
             },
             {
@@ -447,14 +447,15 @@ Resources:
                     "ConsumedReadCapacityUnits",
                     "TableName",
                     "${BooksTable}",
-                    { "region": "${AWS::Region}" }
-                  ]
+                    { "region": "${AWS::Region}", "visible": false, "id": "m1" }
+                  ],
+                  [ { "expression": "m1/PERIOD(m1)", "label": "Consumed", "id": "e1" } ]
                 ],
                 "legend": {
                   "position": "bottom"
                 },
                 "region": "${AWS::Region}",
-                "title": "ConsumedReadCapacityUnits: Sum",
+                "title": "ConsumedReadCapacityUnits: (average units/second)",
                 "period": 60,
                 "view": "timeSeries",
                 "stat": "Sum"
@@ -473,14 +474,15 @@ Resources:
                     "ConsumedWriteCapacityUnits",
                     "TableName",
                     "${BooksTable}",
-                    { "region": "${AWS::Region}", "color": "#d62728" }
-                  ]
+                    { "region": "${AWS::Region}", "visible": false, "id": "m1" }
+                  ],
+                  [ { "expression": "m1/PERIOD(m1)", "label": "Consumed", "id": "e1" } ]
                 ],
                 "legend": {
                   "position": "bottom"
                 },
                 "region": "${AWS::Region}",
-                "title": "ConsumedWriteCapacityUnits: Sum",
+                "title": "ConsumedWriteCapacityUnits: (average units/second)",
                 "period": 60,
                 "view": "timeSeries",
                 "stat": "Sum"
