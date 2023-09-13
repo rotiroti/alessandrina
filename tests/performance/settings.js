@@ -61,6 +61,7 @@ export const cloudRun = (testName) => {
   };
 };
 
+// 3 VUs * 10 iterations = 30 requests
 const baseline = {
   baseline: {
     executor: "per-vu-iterations",
@@ -70,27 +71,30 @@ const baseline = {
   },
 };
 
+// 5 VUs * 200 iterations = 1000 requests
 const vus5 = {
   vus5: {
-    executor: "constant-vus",
+    executor: "per-vu-iterations",
     vus: 5,
-    duration: "1m",
+    iterations: 200,
   },
 };
 
+// 10 VUs * 200 iterations = 2000 requests
 const vus10 = {
   vus10: {
-    executor: "constant-vus",
+    executor: "per-vu-iterations",
     vus: 10,
-    duration: "1m",
+    iterations: 200,
   },
 };
 
+// 15 VUs * 200 iterations = 3000 requests
 const vus15 = {
   vus15: {
-    executor: "constant-vus",
+    executor: "per-vu-iterations",
     vus: 15,
-    duration: "1m",
+    iterations: 200,
   },
 };
 
@@ -99,86 +103,21 @@ const averageVUs = {
     executor: "ramping-vus",
     startVUs: 0,
     stages: [
-      { duration: "10s", target: 10 },
-      { duration: "1m40s", target: 10 },
-      { duration: "10s", target: 0 },
+      { duration: "30s", target: 10 },
+      { duration: "4m", target: 10 },
+      { duration: "30s", target: 0 },
     ],
   },
 };
 
+// ~8K of total requests
 const stressVUs = {
   stressVUs: {
     executor: "ramping-vus",
     startVUs: 0,
     stages: [
-      { duration: "1m", target: 5 },
-      { duration: "2m30s", target: 5 },
-      { duration: "30s", target: 10 },
-      { duration: "2m30s", target: 10 },
-      { duration: "30s", target: 15 },
-      { duration: "2m30s", target: 15 },
-      { duration: "30s", target: 0 },
-    ],
-  },
-};
-
-const rate5 = {
-  rate5: {
-    executor: "constant-arrival-rate",
-    rate: 5,
-    timeUnit: "1s",
-    duration: "5m",
-    preAllocatedVUs: 15,
-  },
-};
-
-const rate10 = {
-  rate10: {
-    executor: "constant-arrival-rate",
-    rate: 10,
-    timeUnit: "1s",
-    duration: "5m",
-    preAllocatedVUs: 30,
-  },
-};
-
-const rate25 = {
-  rate25: {
-    executor: "constant-arrival-rate",
-    rate: 25,
-    timeUnit: "1s",
-    duration: "5m",
-    preAllocatedVUs: 50,
-  },
-};
-
-const averageRate = {
-  averageRate: {
-    executor: "ramping-arrival-rate",
-    startRate: 0,
-    timeUnit: "1s",
-    preAllocatedVUs: 30,
-    stages: [
-      { duration: "1m", target: 10 },
-      { duration: "3m30s", target: 10 },
-      { duration: "30s", target: 0 },
-    ],
-  },
-};
-
-const stressRate = {
-  stressRate: {
-    executor: "ramping-arrival-rate",
-    startRate: 0,
-    timeUnit: "1s",
-    preAllocatedVUs: 50,
-    stages: [
-      { duration: "1m", target: 5 },
-      { duration: "2m30s", target: 5 },
-      { duration: "30s", target: 10 },
-      { duration: "2m30s", target: 10 },
-      { duration: "30s", target: 25 },
-      { duration: "2m30s", target: 25 },
+      { duration: "30s", target: 20 },
+      { duration: "4m", target: 20 },
       { duration: "30s", target: 0 },
     ],
   },
@@ -194,11 +133,6 @@ const workloads = {
   3: vus15,
   4: averageVUs,
   5: stressVUs,
-  6: rate5,
-  7: rate10,
-  8: rate25,
-  9: averageRate,
-  10: stressRate,
 };
 
 /**
@@ -211,11 +145,6 @@ const workloadNames = {
   3: "vus15",
   4: "averageVUs",
   5: "stressVUs",
-  6: "rate5",
-  7: "rate10",
-  8: "rate25",
-  9: "averageRate",
-  10: "stressRate",
 };
 
 /**
