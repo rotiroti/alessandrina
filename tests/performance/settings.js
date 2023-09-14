@@ -123,6 +123,35 @@ const stressVUs = {
   },
 };
 
+const stressRate = {
+  stressRate: {
+    executor: "ramping-arrival-rate",
+
+    // Start iteration per `timeUnit`
+    startRate: 15,
+
+    // Start `startRate` iterations per second
+    timeUnit: "1s",
+
+    // Pre-allocate necessary VUs.
+    preAllocatedVUs: 50,
+
+    stages: [
+      // Start 15 iterations per `timeUnit` for the first 30 seconds.
+      { target: 15, duration: "30s" },
+
+      // Linearly ramp-up to starting 50 iterations per `timeUnit` over the following minute.
+      { target: 50, duration: "1m" },
+
+      // Continue starting 50 iterations per `timeUnit` for the following 2 minutes.
+      { target: 50, duration: "2m" },
+
+      // Linearly ramp-down to starting 60 iterations per `timeUnit` over the last minute.
+      { target: 5, duration: "1m" },
+    ],
+  },
+};
+
 /**
  * Workload configuration.
  */
@@ -133,6 +162,7 @@ const workloads = {
   3: vus15,
   4: averageVUs,
   5: stressVUs,
+  6: stressRate,
 };
 
 /**
@@ -145,6 +175,7 @@ const workloadNames = {
   3: "vus15",
   4: "averageVUs",
   5: "stressVUs",
+  6: "stressRate",
 };
 
 /**
