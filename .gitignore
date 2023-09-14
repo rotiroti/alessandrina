@@ -33,3 +33,6 @@ env*
 # Grafana k6 binary and out
 k6
 *.html
+
+# Log files
+*.log
